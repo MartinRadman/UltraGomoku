@@ -2,23 +2,26 @@ package logika;
 
 import java.util.HashMap;
 
+import splosno.Koordinati;
+
 public class Igra {
 
-	protected static char[][] polje;
+	protected char[][] polje;
 	final char BELI = 'B';
 	final char CRNI = 'C';
-	final static char PRAZEN = '\u0000';
-	protected static String igralec_na_potezi;
-	protected static HashMap<String, Character> igralci;
-	protected static String igralec1;
-	protected static String igralec2;
+	final char PRAZEN = '\u0000';
+	protected String igralec_na_potezi;
+	protected HashMap<String, Character> igralci;
+	protected String igralec1;
+	protected String igralec2;
 	
 	public static void main(String[] args) throws Exception {
+		/*
 		new Igra("Lojze", "Ne vem, zmisl se neki, ne morm se spomnt");
-		odigraj(new Koordinati(0, 0));
+		this.odigraj(new Koordinati(0, 0));
 		stanje_polja();
-		System.out.print(je_konec_igre());
-
+		// System.out.print(je_konec_igre());
+	 */
 	}
 
 	public Igra(int x, int y, String ime1, String ime2) {
@@ -32,18 +35,16 @@ public class Igra {
 	}
 	
 	public Igra(String ime1, String ime2) {
-		polje = new char[15][15];
-		igralci = new HashMap<String, Character>(2);
-		igralec1 = ime1;
-		igralec2 = ime2;
-		igralci.put(igralec1, BELI);
-		igralci.put(igralec2, CRNI);
-		igralec_na_potezi = ime1;
+		this(15, 15, ime1, ime2);
 	}
 	
-	public static boolean odigraj(Koordinati koordinati) {
-		int y_izbrani = koordinati.y;
-		int x_izbrani = koordinati.x;
+	public Igra() {
+		this(15, 15, "Igralec 1", "Igralec 2");
+	}
+	
+	public  boolean odigraj(Koordinati koordinati) {
+		int y_izbrani = koordinati.getY();
+		int x_izbrani = koordinati.getX();
 		if (!je_veljavna_poteza(x_izbrani, y_izbrani)) return false;
 		
 		char izbrano_mesto = polje[y_izbrani][x_izbrani];
@@ -56,14 +57,14 @@ public class Igra {
 		}
 	}
 	
-	public static boolean je_veljavna_poteza(int x_izbrani, int y_izbrani) {
+	public boolean je_veljavna_poteza(int x_izbrani, int y_izbrani) {
 		int y_dolzina = polje.length;
 		int x_dolzina = polje[0].length;
 		if (y_izbrani >= y_dolzina || x_izbrani >= x_dolzina) return false;
 		return true;
 	}
 	
-	public static void stanje_polja() {
+	public void stanje_polja() {
 		for (char[] vrstica : polje) {
 			System.out.print('|');
 			for (char vrednost : vrstica) {
@@ -73,12 +74,12 @@ public class Igra {
 		}
 	}
 	
-	public static void zamenjaj_igralca() {
+	public void zamenjaj_igralca() {
 		if (igralec_na_potezi == igralec1) igralec_na_potezi = igralec2;
 		else igralec_na_potezi = igralec1;
 	}
 	
-	public static boolean je_konec_igre() { // Treba je še izločiti fake null iz preverjanja.
+	public boolean je_konec_igre() { // Treba je še izločiti fake null iz preverjanja.
 		if (je_konec_igre_vodoravno(polje) ||
 			je_konec_igre_navpicno() || 
 			je_konec_igre_diagonalno1(polje) ||
@@ -86,7 +87,7 @@ public class Igra {
 		else return false;
 	}
 	
-	public static boolean je_konec_igre_vodoravno(char[][] p) {
+	public boolean je_konec_igre_vodoravno(char[][] p) {
 		boolean kandidat = false; // Ali je trenutno zaporedje dolgo vsaj 5?
 		for (char[] vrstica : p) {
 			if (kandidat) return true;
@@ -108,7 +109,7 @@ public class Igra {
 		return false;
 	}
 	
-	public static char[][] transponiraj(char[][] a) {
+	public char[][] transponiraj(char[][] a) {
         char[][] b = new char[a[0].length][a.length];
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a[0].length; j++) {
@@ -118,12 +119,12 @@ public class Igra {
     return b;
     }
 	
-	public static boolean je_konec_igre_navpicno() {
+	public boolean je_konec_igre_navpicno() {
 		char[][] transponiranka = transponiraj(polje);
 		return je_konec_igre_vodoravno(transponiranka);
 	}
 	
-	public static boolean je_konec_igre_diagonalno1(char[][] p) {
+	public boolean je_konec_igre_diagonalno1(char[][] p) {
 		int y_dolzina = p.length;
 		int x_dolzina = p[0].length;
 		boolean kandidat = false;
@@ -178,7 +179,7 @@ public class Igra {
 		return false;
 		}
 
-	public static boolean je_konec_igre_diagonalno2() {
+	public boolean je_konec_igre_diagonalno2() {
 		char[][] transponiranka = transponiraj(polje);
 		return je_konec_igre_diagonalno1(transponiranka);
 	}
