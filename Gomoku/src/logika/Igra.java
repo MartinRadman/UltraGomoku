@@ -2,6 +2,7 @@ package logika;
 
 import java.util.HashMap;
 
+import splosno.KdoIgra;
 import splosno.Koordinati;
 
 public class Igra {
@@ -10,39 +11,33 @@ public class Igra {
 	final char BELI = 'B';
 	final char CRNI = 'C';
 	final char PRAZEN = '\u0000';
-	protected String igralec_na_potezi;
+	protected KdoIgra igralec_na_potezi;
 	protected HashMap<String, Character> igralci;
-	protected String igralec1;
-	protected String igralec2;
+	protected KdoIgra igralec1;
+	protected KdoIgra igralec2;
 	
 	public static void main(String[] args) throws Exception {
-		/*
-		new Igra("Lojze", "Ne vem, zmisl se neki, ne morm se spomnt");
-		this.odigraj(new Koordinati(0, 0));
-		stanje_polja();
-		// System.out.print(je_konec_igre());
-	 */
+		Igra i = new Igra();
+		i.odigraj(new Koordinati(0, 0));
+		i.stanje_polja();
+		System.out.print(i.je_konec_igre());
 	}
 
-	public Igra(int x, int y, String ime1, String ime2) {
+	public Igra(int x, int y) {
 		polje = new char[y][x];
 		igralci = new HashMap<String, Character>(2);
-		igralec1 = ime1;
-		igralec2 = ime2;
-		igralci.put(igralec1, BELI);
-		igralci.put(igralec2, CRNI);
-		igralec_na_potezi = ime1;
-	}
-	
-	public Igra(String ime1, String ime2) {
-		this(15, 15, ime1, ime2);
+		igralec1 = new KdoIgra("Igralec 1");
+		igralec2 = new KdoIgra("Igralec 2");
+		igralci.put(igralec1.ime(), BELI);
+		igralci.put(igralec2.ime(), CRNI);
+		igralec_na_potezi = igralec1;
 	}
 	
 	public Igra() {
-		this(15, 15, "Igralec 1", "Igralec 2");
+		this(15, 15);
 	}
 	
-	public  boolean odigraj(Koordinati koordinati) {
+	public boolean odigraj(Koordinati koordinati) {
 		int y_izbrani = koordinati.getY();
 		int x_izbrani = koordinati.getX();
 		if (!je_veljavna_poteza(x_izbrani, y_izbrani)) return false;
@@ -50,11 +45,15 @@ public class Igra {
 		char izbrano_mesto = polje[y_izbrani][x_izbrani];
 		if (izbrano_mesto != PRAZEN) return false;
 		else {
-			char aktivna_crka = igralci.get(igralec_na_potezi);
+			char aktivna_crka = igralci.get(igralec_na_potezi.ime());
 			polje[y_izbrani][x_izbrani] = aktivna_crka;
 			zamenjaj_igralca();
 			return true;
 		}
+	}
+	
+	public void spremeni_ime(KdoIgra igralec, String novo_ime) {
+		igralec = new KdoIgra(novo_ime);
 	}
 	
 	public boolean je_veljavna_poteza(int x_izbrani, int y_izbrani) {
@@ -79,12 +78,11 @@ public class Igra {
 		else igralec_na_potezi = igralec1;
 	}
 	
-	public boolean je_konec_igre() { // Treba je še izločiti fake null iz preverjanja.
-		if (je_konec_igre_vodoravno(polje) ||
+	public boolean je_konec_igre() {
+		return (je_konec_igre_vodoravno(polje) ||
 			je_konec_igre_navpicno() || 
 			je_konec_igre_diagonalno1(polje) ||
-			je_konec_igre_diagonalno2()) return true;
-		else return false;
+			je_konec_igre_diagonalno2());
 	}
 	
 	public boolean je_konec_igre_vodoravno(char[][] p) {
@@ -94,6 +92,7 @@ public class Igra {
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
 			int stevec = 0;
 			for (char vrednost : vrstica) {
+				if (vrednost == PRAZEN) continue;
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
 					if (stevec == 5) kandidat = true;
@@ -136,6 +135,11 @@ public class Igra {
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
+				if (vrednost == PRAZEN) {
+					x += 1;
+					y += 1;
+					continue;
+				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
 					if (stevec == 5) kandidat = true;
@@ -160,6 +164,11 @@ public class Igra {
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
+				if (vrednost == PRAZEN) {
+					x += 1;
+					y += 1;
+					continue;
+				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
 					if (stevec == 5) kandidat = true;
