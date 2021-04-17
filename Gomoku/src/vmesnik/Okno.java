@@ -18,6 +18,7 @@ public class Okno extends JFrame {
 		Igra igra = new Igra();
 		platno = new Platno(800, 800, igra);
 		add(platno);
+		setResizable(false);
 	}
 
 }
