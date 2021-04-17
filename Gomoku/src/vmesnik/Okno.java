@@ -15,7 +15,7 @@ public class Okno extends JFrame {
 	public Okno() {
 		super();
 		setTitle("Gomoku");
-		Igra igra = new Igra();
+		Igra igra = new Igra(20, 10);
 		platno = new Platno(800, 800, igra);
 		add(platno);
 	}

@@ -8,8 +8,8 @@ import splosno.Koordinati;
 public class Igra {
 
 	protected char[][] polje;
-	final char BELI = 'B';
-	final char CRNI = 'C';
+	final char BELI = 'X';
+	final char CRNI = 'O';
 	final char PRAZEN = '\u0000';
 	protected KdoIgra igralec_na_potezi;
 	protected HashMap<String, Character> igralci;
@@ -81,6 +81,10 @@ public class Igra {
 		}
 	}
 	
+	public KdoIgra kdo_igra_simbol() {
+		return igralec_na_potezi;
+	}
+	
 	public void zamenjaj_igralca() {
 		if (igralec_na_potezi == igralec1) igralec_na_potezi = igralec2;
 		else igralec_na_potezi = igralec1;
@@ -131,7 +135,7 @@ public class Igra {
 		return je_konec_igre_vodoravno(transponiranka);
 	}
 	
-	public boolean je_konec_igre_diagonalno1(char[][] p) {
+	public boolean je_konec_igre_diagonalno1(char[][] p) { // Prostor za morebitne polepšave.
 		int y_dolzina = p.length;
 		int x_dolzina = p[0].length;
 		boolean kandidat = false;
