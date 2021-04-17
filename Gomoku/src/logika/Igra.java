@@ -52,6 +52,14 @@ public class Igra {
 		}
 	}
 	
+	public int dimenzija_polja_x() {
+		return this.polje[0].length;
+	}
+	
+	public int dimenzija_polja_y() {
+		return this.polje.length;
+	}
+	
 	public void spremeni_ime(KdoIgra igralec, String novo_ime) {
 		igralec = new KdoIgra(novo_ime);
 	}
