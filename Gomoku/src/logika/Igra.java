@@ -23,18 +23,18 @@ public class Igra {
 		System.out.print(i.je_konec_igre());
 	}
 
-	public Igra(int x, int y) {
+	public Igra(int x, int y, String igralec1_ime, String igralec2_ime) {
 		polje = new char[y][x];
 		igralci = new HashMap<String, Character>(2);
-		igralec1 = new KdoIgra("Igralec 1");
-		igralec2 = new KdoIgra("Igralec 2");
+		igralec1 = new KdoIgra(igralec1_ime);
+		igralec2 = new KdoIgra(igralec2_ime);
 		igralci.put(igralec1.ime(), BELI);
 		igralci.put(igralec2.ime(), CRNI);
 		igralec_na_potezi = igralec1;
 	}
 	
 	public Igra() {
-		this(15, 15);
+		this(15, 15, "1. igralec", "2. igralec");
 	}
 	
 	public boolean odigraj(Koordinati koordinati) {
@@ -203,6 +203,13 @@ public class Igra {
 	public boolean je_konec_igre_diagonalno2() {
 		char[][] transponiranka = transponiraj(polje);
 		return je_konec_igre_diagonalno1(transponiranka);
+	}
+	
+	public String[] imena_igralcev() {
+		String[] imena = new String[2];
+		imena[0] = igralec1.ime();
+		imena[1] = igralec2.ime();
+		return imena;
 	}
 }
 
