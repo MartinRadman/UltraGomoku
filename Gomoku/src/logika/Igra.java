@@ -19,8 +19,21 @@ public class Igra {
 	public static void main(String[] args) throws Exception {
 		Igra i = new Igra();
 		i.odigraj(new Koordinati(0, 0));
+		i.zamenjaj_igralca();
+		i.odigraj(new Koordinati(1, 1));
+		i.zamenjaj_igralca();
+		i.odigraj(new Koordinati(2, 2));
+		i.zamenjaj_igralca();
+		i.odigraj(new Koordinati(3, 3));
+		i.zamenjaj_igralca();
+		i.odigraj(new Koordinati(4, 4));
+
 		i.stanje_polja();
-		System.out.print(i.je_konec_igre());
+		System.out.println(i.je_konec_igre());
+		
+		i.polje = i.zavrti90stopinj(i.polje);
+		i.stanje_polja();
+		
 	}
 
 	public Igra(int x, int y, String igralec1_ime, String igralec2_ime) {
@@ -102,7 +115,7 @@ public class Igra {
 		for (char[] vrstica : p) {
 			if (kandidat) return true;
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
-			int stevec = 0;
+			int stevec = 1;
 			for (char vrednost : vrstica) {
 				if (vrednost == PRAZEN) continue;
 				if (vrednost == trenutna_vrednost) {
@@ -112,7 +125,7 @@ public class Igra {
 				}
 				else {
 					trenutna_vrednost = vrednost;
-					stevec = 0;
+					stevec = 1;
 					if (kandidat) return true;
 				}
 			}
@@ -120,7 +133,7 @@ public class Igra {
 		return false;
 	}
 	
-	public char[][] transponiraj(char[][] a) {
+	private char[][] transponiraj(char[][] a) {
         char[][] b = new char[a[0].length][a.length];
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a[0].length; j++) {
@@ -129,6 +142,22 @@ public class Igra {
         }
     return b;
     }
+	
+	private char[][] zavrti90stopinj(char[][] a){
+		int x = dimenzija_polja_x();
+		int y = dimenzija_polja_y();
+		char[][] nova_matrika = new char[y][x];
+		
+		for (int i = x - 1; i >= 0; i--) {
+			char[] nova_vrstica = new char[y];
+			for (int j = 0; j < y; j++) {
+				nova_vrstica[j] = a[j][i];
+			}
+			nova_matrika[x - (i + 1)] = nova_vrstica;
+		}
+		
+		return nova_matrika;
+	}
 	
 	public boolean je_konec_igre_navpicno() {
 		char[][] transponiranka = transponiraj(polje);
@@ -147,6 +176,7 @@ public class Igra {
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
+				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
 					y += 1;
@@ -159,7 +189,7 @@ public class Igra {
 				}
 				else {
 					trenutna_vrednost = vrednost;
-					stevec = 0;
+					stevec = 1;
 					if (kandidat) return true;
 				}
 				x += 1;
@@ -176,6 +206,7 @@ public class Igra {
 			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
+				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
 					y += 1;
@@ -188,7 +219,7 @@ public class Igra {
 				}
 				else {
 					trenutna_vrednost = vrednost;
-					stevec = 0;
+					stevec = 1;
 					if (kandidat) return true;
 				}
 				x += 1;
@@ -201,8 +232,8 @@ public class Igra {
 		}
 
 	public boolean je_konec_igre_diagonalno2() {
-		char[][] transponiranka = transponiraj(polje);
-		return je_konec_igre_diagonalno1(transponiranka);
+		char[][] zarotiranka = zavrti90stopinj(polje);
+		return je_konec_igre_diagonalno1(zarotiranka);
 	}
 	
 	public String[] imena_igralcev() {
@@ -211,6 +242,11 @@ public class Igra {
 		imena[1] = igralec2.ime();
 		return imena;
 	}
+	
+	public String ime_igralca_na_potezi() {
+		return igralec_na_potezi.ime();
+	}
+
 }
 
 

@@ -1,6 +1,16 @@
+/* Potrebni popravki:
+   -undo move
+   -ozadje
+   -keyboard shortcuts
+   -ohranitev nastavitev
+   -spremljanje časa - šahovska ura?
+   -polepšava okenca za novo igro po meri
+*/
+
 package vmesnik;
 
 import java.awt.Color;
+
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,6 +32,8 @@ import logika.Igra;
 public class Okno extends JFrame implements ActionListener {
 	protected Platno platno;
 	
+	private Igra igra;
+	
 	protected String ime_igralca_1;
 	protected String ime_igralca_2;
 	
@@ -33,13 +45,13 @@ public class Okno extends JFrame implements ActionListener {
 	public Okno(int sirina_igralnega_polja, int visina_igralnega_polja, String igralec1_ime, String igralec2_ime) {
 		super();
 		setTitle("Gomoku");
-		Igra igra = new Igra(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
-		platno = new Platno(800, 800, igra);
+		igra = new Igra(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
+		platno = new Platno(800, 800, this, igra);
 		add(platno);
 		
 		String[] imena_igralcev = igra.imena_igralcev();
 		ime_igralca_1 = imena_igralcev[0];
-		ime_igralca_1 = imena_igralcev[1];
+		ime_igralca_2 = imena_igralcev[1];
 		
 		//menuji
 		
@@ -86,7 +98,7 @@ public class Okno extends JFrame implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Object source = e.getSource(); // Prostor za morebitne polep�ave
+		Object source = e.getSource(); // Prostor za morebitne polepšave
 		if (source == menuBarvaIgralca1) {
 			Color barva = JColorChooser.showDialog(this, "Izberi barvo igralca", platno.barva_igralca_1);
 			if (barva != null) {
@@ -116,10 +128,10 @@ public class Okno extends JFrame implements ActionListener {
 		    JTextField poljeIme2 = new JTextField(5);
 
 		    JPanel okence = new JPanel();
-		    okence.add(new JLabel("�tevilo vrstic:"));
+		    okence.add(new JLabel("Število vrstic:"));
 		    okence.add(poljeVrstice);
 		    okence.add(Box.createHorizontalStrut(15)); // presledek
-		    okence.add(new JLabel("�tevilo stolpcev:"));
+		    okence.add(new JLabel("Število stolpcev:"));
 		    okence.add(poljeStolpci);
 		    okence.add(Box.createRigidArea(new Dimension(1, 1)));
 		    okence.add(new JLabel("Ime 1. igralca"));
@@ -142,5 +154,16 @@ public class Okno extends JFrame implements ActionListener {
 		    
 		 
 	    }
+	}
+	
+	public void konec_igre(boolean je_zmaga) {
+		if (je_zmaga) {
+			igra.zamenjaj_igralca();
+			
+			JPanel okence = new JPanel();
+			JOptionPane.showMessageDialog(okence, "Zmagal je " + igra.ime_igralca_na_potezi(), "Konec igre", JOptionPane.PLAIN_MESSAGE);
+		}
+		igra = new Igra();
+		
 	}
 }
