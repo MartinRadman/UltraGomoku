@@ -1,5 +1,8 @@
 package logika;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import splosno.KdoIgra;
@@ -7,14 +10,15 @@ import splosno.Koordinati;
 
 public class Igra {
 
-	protected char[][] polje;
-	final char BELI = 'X';
-	final char CRNI = 'O';
-	final char PRAZEN = '\u0000';
+	protected Polje[][] polje;
+	final Igralec CRNI = Igralec.X;
+	final Igralec BELI = Igralec.O;
+	final Polje PRAZEN = Polje.PRAZEN;
 	protected KdoIgra igralec_na_potezi;
-	protected HashMap<String, Character> igralci;
+	protected HashMap<String, Igralec> igralci;
 	protected KdoIgra igralec1;
 	protected KdoIgra igralec2;
+	protected List<EnotaPolja> enote_polja;
 	
 	public static void main(String[] args) throws Exception {
 		Igra i = new Igra();
@@ -34,31 +38,173 @@ public class Igra {
 		i.polje = i.zavrti90stopinj(i.polje);
 		i.stanje_polja();
 		
+		int[] a = {1, 2, 3};
+		int[] b = a;
+		b[0] = 0;
+		System.out.println("" + a[0]);
+		
+		System.out.println("" + i.enote_polja.size());
+		
+	}
+	
+	public enum Igralec {
+		O, X;
+		
+		public Igralec nasprotnik() {
+			return (this == X ? O : X);
+		}
+		
+		public Polje getPolje() {
+			return (this == X ? Polje.X : Polje.O);
+		}
+	}
+	
+	public enum Polje {
+		O, X, PRAZEN
+	}
+	
+	public enum Stanje {
+		ZMAGA_O, ZMAGA_X, NEODLOCENO, V_TEKU
 	}
 
 	public Igra(int x, int y, String igralec1_ime, String igralec2_ime) {
-		polje = new char[y][x];
-		igralci = new HashMap<String, Character>(2);
+		polje = new Polje[y][x];
+		igralci = new HashMap<String, Igralec>(2);
 		igralec1 = new KdoIgra(igralec1_ime);
 		igralec2 = new KdoIgra(igralec2_ime);
 		igralci.put(igralec1.ime(), BELI);
 		igralci.put(igralec2.ime(), CRNI);
 		igralec_na_potezi = igralec1;
+		enote_polja = new ArrayList<EnotaPolja>();
+		
+		napolni_polje_s_praznimi();
+		zgradi_enote_polja();
 	}
 	
 	public Igra() {
 		this(15, 15, "1. igralec", "2. igralec");
 	}
 	
+	public Igra(Igra igra) {
+		this(igra.dimenzija_polja_x(),
+				igra.dimenzija_polja_y(),
+				igra.imena_igralcev()[0],
+				igra.imena_igralcev()[1]);
+		
+		this.igralec_na_potezi = igra.igralec_na_potezi;
+		this.polje = igra.polje;
+	}
+	
+	public void napolni_polje_s_praznimi() {
+		for (int j = 0; j < dimenzija_polja_y(); j++) {
+			Polje[] prazna_vrstica = new Polje[dimenzija_polja_x()]; 
+			Arrays.fill(prazna_vrstica, PRAZEN);
+			polje[j] = prazna_vrstica;
+		}
+	}
+	
+	public void zgradi_enote_polja() { // Treba preveriti ali deluje pravilno (načeloma ja)
+		zgradi_vrstice_ali_stolpce(true);
+		zgradi_vrstice_ali_stolpce(false);
+		zgradi_diagonale();
+		zgradi_antidiagonale();
+	}
+	
+	public void zgradi_vrstice_ali_stolpce(boolean je_vrstica) { 
+		int x = (je_vrstica) ? dimenzija_polja_y() : dimenzija_polja_x();
+		int y = (je_vrstica) ? dimenzija_polja_x() : dimenzija_polja_y();
+		for (int j = 0; j < x; j++) {
+			List<int[]> vrstica = new ArrayList<int[]>();
+			for (int i = 0; i < y; i++) {
+				int[] koordinati = new int[2];
+				koordinati[0] = i;
+				koordinati[1] = j;
+				vrstica.add(koordinati);
+			}
+			enote_polja.add(new EnotaPolja(vrstica));
+		}
+	}
+	
+	public void zgradi_diagonale() { // Prostor za morebitne polepšave
+		int x_dolzina = dimenzija_polja_x();
+		int y_dolzina = dimenzija_polja_y();
+		
+		for (int odmik = 0; odmik < x_dolzina; odmik++) {
+			List<int[]> diagonala = new ArrayList<int[]>();
+			int x = 0 + odmik;
+			int y = 0;
+			while (je_veljavna_poteza(x, y)) {
+				int[] koordinati = new int[2];
+				koordinati[0] = x;
+				koordinati[1] = y;
+				diagonala.add(koordinati);
+				x += 1;
+				y += 1;
+			}
+			enote_polja.add(new EnotaPolja(diagonala));
+		}
+		
+		for (int odmik = 1; odmik < y_dolzina; odmik++) {
+			List<int[]> diagonala = new ArrayList<int[]>();
+			int x = 0;
+			int y = 0 + odmik;
+			while (je_veljavna_poteza(x, y)) {
+				int[] koordinati = new int[2];
+				koordinati[0] = x;
+				koordinati[1] = y;
+				diagonala.add(koordinati);
+				x += 1;
+				y += 1;
+			}
+			enote_polja.add(new EnotaPolja(diagonala));
+		}
+	}
+	
+	public void zgradi_antidiagonale() { // Prostor za morebitne polepšave
+		int x_dolzina = dimenzija_polja_x();
+		int y_dolzina = dimenzija_polja_y();
+		
+		for (int odmik = 0; odmik < x_dolzina; odmik++) {
+			List<int[]> diagonala = new ArrayList<int[]>();
+			int x = x_dolzina - 1 - odmik;
+			int y = y_dolzina - 1;
+			while (je_veljavna_poteza(x, y)) {
+				int[] koordinati = new int[2];
+				koordinati[0] = x;
+				koordinati[1] = y;
+				diagonala.add(koordinati);
+				x -= 1;
+				y -= 1;
+			}
+			enote_polja.add(new EnotaPolja(diagonala));
+		}
+		
+		for (int odmik = 1; odmik < y_dolzina; odmik++) {
+			List<int[]> diagonala = new ArrayList<int[]>();
+			int x = x_dolzina - 1;
+			int y = y_dolzina - 1 - odmik;
+			while (je_veljavna_poteza(x, y)) {
+				int[] koordinati = new int[2];
+				koordinati[0] = x;
+				koordinati[1] = y;
+				diagonala.add(koordinati);
+				x -= 1;
+				y -= 1;
+			}
+			enote_polja.add(new EnotaPolja(diagonala));
+		}
+	}
+	
+	
 	public boolean odigraj(Koordinati koordinati) {
 		int y_izbrani = koordinati.getY();
 		int x_izbrani = koordinati.getX();
 		if (!je_veljavna_poteza(x_izbrani, y_izbrani)) return false;
 		
-		char izbrano_mesto = polje[y_izbrani][x_izbrani];
+		Polje izbrano_mesto = polje[y_izbrani][x_izbrani];
 		if (izbrano_mesto != PRAZEN) return false;
 		else {
-			char aktivna_crka = igralci.get(igralec_na_potezi.ime());
+			Polje aktivna_crka = igralci.get(igralec_na_potezi.ime()).getPolje();
 			polje[y_izbrani][x_izbrani] = aktivna_crka;
 			zamenjaj_igralca();
 			return true;
@@ -80,14 +226,14 @@ public class Igra {
 	public boolean je_veljavna_poteza(int x_izbrani, int y_izbrani) {
 		int y_dolzina = polje.length;
 		int x_dolzina = polje[0].length;
-		if (y_izbrani >= y_dolzina || x_izbrani >= x_dolzina) return false;
+		if (y_izbrani >= y_dolzina || x_izbrani >= x_dolzina || y_izbrani < 0 || x_izbrani < 0) return false;
 		return true;
 	}
 	
 	public void stanje_polja() {
-		for (char[] vrstica : polje) {
+		for (Polje[] vrstica : polje) {
 			System.out.print('|');
-			for (char vrednost : vrstica) {
+			for (Polje vrednost : vrstica) {
 				System.out.print("" + vrednost + '|');
 			}
 			System.out.println();
@@ -110,18 +256,20 @@ public class Igra {
 			je_konec_igre_diagonalno2());
 	}
 	
-	public boolean je_konec_igre_vodoravno(char[][] p) {
+	public boolean je_konec_igre_vodoravno(Polje[][] p) {
 		boolean kandidat = false; // Ali je trenutno zaporedje dolgo vsaj 5?
-		for (char[] vrstica : p) {
+		for (Polje[] vrstica : p) {
 			if (kandidat) return true;
-			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
+			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 1;
-			for (char vrednost : vrstica) {
-				if (vrednost == PRAZEN) continue;
+			for (Polje vrednost : vrstica) {
+				if (vrednost == PRAZEN) {
+					trenutna_vrednost = PRAZEN;
+					continue;
+				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec == 5) kandidat = true;
-					if (stevec == 6) kandidat = false;
+					if (stevec >= 5) kandidat = true;
 				}
 				else {
 					trenutna_vrednost = vrednost;
@@ -133,25 +281,25 @@ public class Igra {
 		return false;
 	}
 	
-	private char[][] transponiraj(char[][] a) {
-        char[][] b = new char[a[0].length][a.length];
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a[0].length; j++) {
-                b[j][i] = a[i][j];
+	private Polje[][] transponiraj(Polje[][] polje2) {
+        Polje[][] b = new Polje[polje2[0].length][polje2.length];
+        for (int i = 0; i < polje2.length; i++) {
+            for (int j = 0; j < polje2[0].length; j++) {
+                b[j][i] = polje2[i][j];
             }
         }
     return b;
     }
 	
-	private char[][] zavrti90stopinj(char[][] a){
+	private Polje[][] zavrti90stopinj(Polje[][] polje2){
 		int x = dimenzija_polja_x();
 		int y = dimenzija_polja_y();
-		char[][] nova_matrika = new char[y][x];
+		Polje[][] nova_matrika = new Polje[y][x];
 		
 		for (int i = x - 1; i >= 0; i--) {
-			char[] nova_vrstica = new char[y];
+			Polje[] nova_vrstica = new Polje[y];
 			for (int j = 0; j < y; j++) {
-				nova_vrstica[j] = a[j][i];
+				nova_vrstica[j] = polje2[j][i];
 			}
 			nova_matrika[x - (i + 1)] = nova_vrstica;
 		}
@@ -160,11 +308,11 @@ public class Igra {
 	}
 	
 	public boolean je_konec_igre_navpicno() {
-		char[][] transponiranka = transponiraj(polje);
+		Polje[][] transponiranka = transponiraj(polje);
 		return je_konec_igre_vodoravno(transponiranka);
 	}
 	
-	public boolean je_konec_igre_diagonalno1(char[][] p) { // Prostor za morebitne polepšave.
+	public boolean je_konec_igre_diagonalno1(Polje[][] p) { // Prostor za morebitne polepšave.
 		int y_dolzina = p.length;
 		int x_dolzina = p[0].length;
 		boolean kandidat = false;
@@ -172,20 +320,20 @@ public class Igra {
 			int x = 0 + odmik;
 			int y = 0;
 			if (kandidat) return true;
-			char vrednost = p[y][x];
-			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
+			Polje vrednost = p[y][x];
+			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
 				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
 					y += 1;
+					trenutna_vrednost = PRAZEN;
 					continue;
 				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec == 5) kandidat = true;
-					if (stevec == 6) kandidat = false;
+					if (stevec >= 5) kandidat = true;
 				}
 				else {
 					trenutna_vrednost = vrednost;
@@ -202,20 +350,20 @@ public class Igra {
 			int x = 0;
 			int y = 0 + odmik;
 			if (kandidat) return true;
-			char vrednost = p[y][x];
-			char trenutna_vrednost = 'N'; // Neopredeljena vrednost
+			Polje vrednost = p[y][x];
+			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
 			while (je_veljavna_poteza(x, y)) {
 				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
 					y += 1;
+					trenutna_vrednost = PRAZEN;
 					continue;
 				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec == 5) kandidat = true;
-					if (stevec == 6) kandidat = false;
+					if (stevec >= 5) kandidat = true;
 				}
 				else {
 					trenutna_vrednost = vrednost;
@@ -232,8 +380,16 @@ public class Igra {
 		}
 
 	public boolean je_konec_igre_diagonalno2() {
-		char[][] zarotiranka = zavrti90stopinj(polje);
+		Polje[][] zarotiranka = zavrti90stopinj(polje);
 		return je_konec_igre_diagonalno1(zarotiranka);
+	}
+	
+	public Stanje stanje() {
+		if (je_konec_igre()) {
+			return ((igralec_na_potezi == igralec1) ? Stanje.ZMAGA_O : Stanje.ZMAGA_X);
+		}
+		if (poteze().size() == 0) return Stanje.NEODLOCENO;
+		return Stanje.V_TEKU;
 	}
 	
 	public String[] imena_igralcev() {
@@ -245,6 +401,24 @@ public class Igra {
 	
 	public String ime_igralca_na_potezi() {
 		return igralec_na_potezi.ime();
+	}
+	
+	public Igralec na_potezi() {
+		return igralci.get(ime_igralca_na_potezi());
+	}
+	
+	public List<Koordinati> poteze() {
+		List<Koordinati> list_potez = new ArrayList<Koordinati>();
+		for (int j = 0; j < dimenzija_polja_y(); j++) {
+			for (int i = 0; i < dimenzija_polja_x(); i++) {
+				if (polje[j][i] == PRAZEN) list_potez.add(new Koordinati(i, j));
+			}
+		}
+		return list_potez;
+	}
+	
+	public Polje[][] polje() {
+		return polje;
 	}
 
 }

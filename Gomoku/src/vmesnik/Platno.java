@@ -3,7 +3,6 @@ package vmesnik;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.util.List;
 import java.util.Map;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -11,7 +10,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -176,6 +174,11 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 		repaint();
 		if (igra.je_konec_igre()) {
 			okno.konec_igre(true);
+			this.nova_igra();
+		}
+		
+		if (igra.poteze().size() == 0) {
+			okno.konec_igre(false);
 			this.nova_igra();
 		}
 	}

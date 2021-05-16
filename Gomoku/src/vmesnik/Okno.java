@@ -163,6 +163,10 @@ public class Okno extends JFrame implements ActionListener {
 			JPanel okence = new JPanel();
 			JOptionPane.showMessageDialog(okence, "Zmagal je " + igra.ime_igralca_na_potezi(), "Konec igre", JOptionPane.PLAIN_MESSAGE);
 		}
+		else {
+			JPanel okence = new JPanel();
+			JOptionPane.showMessageDialog(okence, "Igra je neodločena!", "Konec igre", JOptionPane.PLAIN_MESSAGE);
+		}
 		igra = new Igra();
 		
 	}
