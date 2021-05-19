@@ -1,10 +1,8 @@
 package inteligenca;
 
-import java.util.List;
+import java.util.HashSet;
 
 import logika.Igra.Igralec;
-import inteligenca_fake.OceniPozicijo;
-import inteligenca.OcenjenaPoteza;
 import logika.Igra;
 import splosno.Koordinati;
 
@@ -30,10 +28,10 @@ public class Minimax extends Inteligenca {
 	// vrne najboljso ocenjeno potezo z vidike igralca jaz
 	public OcenjenaPoteza minimax(Igra igra, int globina, Igralec jaz) {
 		OcenjenaPoteza najboljsaPoteza = null;
-		List<Koordinati> moznePoteze = igra.poteze();
+		HashSet<Koordinati> moznePoteze = igra.mnozica_potez();
 		for (Koordinati p: moznePoteze) {
 			Igra kopijaIgre = new Igra(igra);
-			kopijaIgre.odigraj (p);
+			kopijaIgre.odigraj(p);
 			int ocena;
 			switch (kopijaIgre.stanje()) {
 			case ZMAGA_O: ocena = (jaz == Igralec.O ? ZMAGA : ZGUBA); break;
@@ -43,14 +41,14 @@ public class Minimax extends Inteligenca {
 				// nekdo je na potezi
 				if (globina == 1) ocena = OceniPozicijo.oceniPozicijo(kopijaIgre, jaz);
 				// globina > 1
-				else ocena = minimax(kopijaIgre, globina-1, jaz).ocena;	
+				else ocena = minimax(kopijaIgre, globina - 1, jaz).ocena;	
 			}
 			if (najboljsaPoteza == null 
-					// max, Ä?e je p moja poteza
-					|| jaz == igra.naPotezi() && ocena > najboljsaPoteza.ocena
+					// max, Äe je p moja poteza
+					|| jaz == igra.na_potezi() && ocena > najboljsaPoteza.ocena
 					// sicer min 
-					|| jaz != igra.naPotezi() && ocena < najboljsaPoteza.ocena)
-				najboljsaPoteza = new OcenjenaPoteza (p, ocena);		
+					|| jaz != igra.na_potezi() && ocena < najboljsaPoteza.ocena)
+				najboljsaPoteza = new OcenjenaPoteza(p, ocena);		
 		}
 		return najboljsaPoteza;
 	}

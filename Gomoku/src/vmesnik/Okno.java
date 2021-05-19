@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EnumMap;
 
 import javax.swing.Box;
 import javax.swing.JColorChooser;
@@ -27,6 +28,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import logika.Igra;
+import logika.Igra.Igralec;
+import splosno.KdoIgra;
+import splosno.Koordinati;
+import vodja.Vodja;
+import vodja.VrstaIgralca;
 
 @SuppressWarnings("serial")
 public class Okno extends JFrame implements ActionListener {
@@ -39,19 +45,37 @@ public class Okno extends JFrame implements ActionListener {
 	
 	private JMenuItem menuBarvaIgralca1;
 	private JMenuItem menuBarvaIgralca2;
+	
+	private JMenuItem igraClovekRacunalnik;
 	private JMenuItem menuOsnovnaIgra;
 	private JMenuItem menuIgraPoMeri;
 	
-	public Okno(int sirina_igralnega_polja, int visina_igralnega_polja, String igralec1_ime, String igralec2_ime) {
+	public Okno(int sirina_igralnega_polja, int visina_igralnega_polja, String igralec1_ime, String igralec2_ime, VrstaIgralca igralec1, VrstaIgralca igralec2) {
 		super();
 		setTitle("Gomoku");
-		igra = new Igra(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
+		
+		
+		Vodja.okno = this;
+		Vodja.vrstaIgralca = new EnumMap<Igralec,VrstaIgralca>(Igralec.class);
+		Vodja.vrstaIgralca.put(Igralec.O, igralec1); 
+		Vodja.vrstaIgralca.put(Igralec.X, igralec2);
+		Vodja.kdoIgra = new EnumMap<Igralec,KdoIgra>(Igralec.class);
+		Vodja.kdoIgra.put(Igralec.O, new KdoIgra(igralec1_ime)); 
+		Vodja.kdoIgra.put(Igralec.X, new KdoIgra(igralec2_ime));
+		Vodja.igramoNovoIgro(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
+
+		
+		igra = Vodja.igra;
+		
+		
 		platno = new Platno(800, 800, this, igra);
 		add(platno);
 		
 		String[] imena_igralcev = igra.imena_igralcev();
 		ime_igralca_1 = imena_igralcev[0];
 		ime_igralca_2 = imena_igralcev[1];
+		
+		Vodja.igramo();
 		
 		//menuji
 		
@@ -60,6 +84,8 @@ public class Okno extends JFrame implements ActionListener {
 		
 		JMenu menuIgra = dodajMenu(menubar, "Igra");
 		JMenu menuNovaIgra = dodajMenuNaMenu(menuIgra, "Nova igra");
+		
+		igraClovekRacunalnik = dodajMenuItem(menuNovaIgra, "Človek – računalnik");
 		
 		menuOsnovnaIgra = dodajMenuItem(menuNovaIgra, "Nova osnovna igra");
 		menuIgraPoMeri = dodajMenuItem(menuNovaIgra, "Nova igra po meri ...");
@@ -74,7 +100,7 @@ public class Okno extends JFrame implements ActionListener {
 	}
 	
 	public Okno() {
-		this(15, 15, "1. igralec", "2. igralec");
+		this(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.C);
 	}
 	
 	public JMenu dodajMenu(JMenuBar menubar, String naslov) {
@@ -142,18 +168,22 @@ public class Okno extends JFrame implements ActionListener {
 		    int rezultat = JOptionPane.showConfirmDialog(null, okence,
 		            "Prosimo vnesite zahtevane podatke", JOptionPane.OK_CANCEL_OPTION);
 		    
-		    if (rezultat == JOptionPane.OK_OPTION) {
+		    if (rezultat == JOptionPane.OK_OPTION) { // debug vrsta igralca
 		    	int sirina_igralnega_polja = Integer.valueOf(poljeStolpci.getText());
 		    	int visina_igralnega_polja = Integer.valueOf(poljeVrstice.getText());
 		    	String igralec1_ime = poljeIme1.getText();
 		    	String igralec2_ime = poljeIme2.getText();
-		    	Okno okno = new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
+		    	Okno okno = new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
 				okno.pack();
 				okno.setVisible(true);
 		    }
-		    
-		 
 	    }
+		
+		if (e.getSource() == igraClovekRacunalnik) {
+			Okno novo_okno = new Okno(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.R);
+			novo_okno.pack();
+			novo_okno.setVisible(true);
+		}
 	}
 	
 	public void konec_igre(boolean je_zmaga) {
@@ -169,5 +199,20 @@ public class Okno extends JFrame implements ActionListener {
 		}
 		igra = new Igra();
 		
+	}
+	
+	public void osvezi_vmesnik() {
+		platno.repaint();
+	}
+	
+	public void odigraj(Koordinati poteza) { // znebi se tega raka
+		int[] kvadratek = new int[2];
+		kvadratek[0] = poteza.getX();
+		kvadratek[1] = poteza.getY();
+		System.out.println("" + kvadratek[0] + " " + kvadratek[1]);
+		int st_kvadratka = (kvadratek[1] + 1) * 16 + kvadratek[0] + 1;
+ 		if (platno.prvi) platno.izbrana_polja.get("1").add(st_kvadratka);
+		else platno.izbrana_polja.get("2").add(st_kvadratka);
+		platno.prvi = !platno.prvi;
 	}
 }

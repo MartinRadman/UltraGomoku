@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import splosno.KdoIgra;
 import splosno.Koordinati;
@@ -19,6 +20,8 @@ public class Igra {
 	protected KdoIgra igralec1;
 	protected KdoIgra igralec2;
 	protected List<EnotaPolja> enote_polja;
+	protected HashSet<Koordinati> mnozica_potez = new HashSet<Koordinati>();
+	protected HashSet<Koordinati> mnozica_izvedenih_potez = new HashSet<Koordinati>();
 	
 	public static void main(String[] args) throws Exception {
 		Igra i = new Igra();
@@ -60,7 +63,11 @@ public class Igra {
 	}
 	
 	public enum Polje {
-		O, X, PRAZEN
+		O, X, PRAZEN;
+		
+		public Igralec getIgralec() {
+			return (this == X ? Igralec.X : Igralec.O);
+		}
 	}
 	
 	public enum Stanje {
@@ -79,6 +86,7 @@ public class Igra {
 		
 		napolni_polje_s_praznimi();
 		zgradi_enote_polja();
+		napolni_poteze();
 	}
 	
 	public Igra() {
@@ -92,7 +100,19 @@ public class Igra {
 				igra.imena_igralcev()[1]);
 		
 		this.igralec_na_potezi = igra.igralec_na_potezi;
-		this.polje = igra.polje;
+		this.polje = kopija_matrike(igra.polje);
+	}
+	
+	private Polje[][] kopija_matrike(Polje[][] matrika) {
+		int x = matrika[0].length;
+		int y = matrika.length;
+		Polje[][] nova = new Polje[y][x];
+		for(int i = 0; i < nova.length; i++) {
+			for(int j = 0; j < nova[i].length; j++) {				
+				nova[i][j] = matrika[i][j];
+			}
+		}
+		return nova;
 	}
 	
 	public void napolni_polje_s_praznimi() {
@@ -206,6 +226,9 @@ public class Igra {
 		else {
 			Polje aktivna_crka = igralci.get(igralec_na_potezi.ime()).getPolje();
 			polje[y_izbrani][x_izbrani] = aktivna_crka;
+			Koordinati izbrani_koordinati = new Koordinati(x_izbrani, y_izbrani);
+			mnozica_potez.remove(izbrani_koordinati);
+			mnozica_izvedenih_potez.add(izbrani_koordinati);
 			zamenjaj_igralca();
 			return true;
 		}
@@ -388,7 +411,7 @@ public class Igra {
 		if (je_konec_igre()) {
 			return ((igralec_na_potezi == igralec1) ? Stanje.ZMAGA_O : Stanje.ZMAGA_X);
 		}
-		if (poteze().size() == 0) return Stanje.NEODLOCENO;
+		if (mnozica_potez.size() == 0) return Stanje.NEODLOCENO;
 		return Stanje.V_TEKU;
 	}
 	
@@ -407,18 +430,26 @@ public class Igra {
 		return igralci.get(ime_igralca_na_potezi());
 	}
 	
-	public List<Koordinati> poteze() {
-		List<Koordinati> list_potez = new ArrayList<Koordinati>();
+	public void napolni_poteze() {
 		for (int j = 0; j < dimenzija_polja_y(); j++) {
-			for (int i = 0; i < dimenzija_polja_x(); i++) {
-				if (polje[j][i] == PRAZEN) list_potez.add(new Koordinati(i, j));
-			}
+			for (int i = 0; i < dimenzija_polja_x(); i++) mnozica_potez.add(new Koordinati(i, j));
 		}
-		return list_potez;
 	}
 	
 	public Polje[][] polje() {
 		return polje;
+	}
+	
+	public List<EnotaPolja> enote_polja() {
+		return enote_polja;
+	}
+	
+	public HashSet<Koordinati> mnozica_potez() {
+		return mnozica_potez;
+	}
+	
+	public HashSet<Koordinati> mnozica_izvedenih_potez() {
+		return mnozica_izvedenih_potez;
 	}
 
 }

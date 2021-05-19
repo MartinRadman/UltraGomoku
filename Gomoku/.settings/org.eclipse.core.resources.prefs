@@ -1,4 +1,7 @@
 eclipse.preferences.version=1
 encoding//src/inteligenca/Inteligenca.java=UTF-8
+encoding//src/inteligenca/Minimax.java=UTF-8
 encoding//src/logika/Igra.java=UTF-8
 encoding//src/vmesnik/Okno.java=UTF-8
+encoding//src/vodja/Vodja.java=UTF-8
+encoding//src/vodja/VrstaIgralca.java=UTF-8

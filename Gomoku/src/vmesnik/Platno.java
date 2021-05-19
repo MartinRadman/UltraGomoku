@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import logika.Igra;
 
 import splosno.Koordinati;
+import vodja.Vodja;
 
 @SuppressWarnings("serial")
 public class Platno extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
@@ -25,7 +26,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 	protected Color barva_igralca_1 = Color.BLACK;
 	protected Color barva_igralca_2 = Color.RED;
 	protected Color barva_ozadja = Color.GRAY;
-	protected Igra igra;
+	public Igra igra;
 	protected HashMap<Integer, int[]> kvadratki;
 	protected HashMap<Integer, String> zemljevid_kvadratkov;
 	protected int stranica_kvadratka;
@@ -167,7 +168,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 				if (prvi) this.izbrana_polja.get("1").add(kvadratek.getKey());
 				else this.izbrana_polja.get("2").add(kvadratek.getKey());
 				this.prvi = !prvi;
-				igra.odigraj(this.pretvori_iz_kvadrata(kljuc));
+				Vodja.igrajClovekovoPotezo(this.pretvori_iz_kvadrata(kljuc));
 				break;
 			}
 		}
@@ -177,7 +178,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 			this.nova_igra();
 		}
 		
-		if (igra.poteze().size() == 0) {
+		if (igra.mnozica_potez().size() == 0) {
 			okno.konec_igre(false);
 			this.nova_igra();
 		}
@@ -253,7 +254,6 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 		// TODO Auto-generated method stub
 		
 	}
-	
 }
 
 // {"1" : {{1, 5}, {8, 4}}; "2" : {{5, 2}}}
