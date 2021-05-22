@@ -48,6 +48,9 @@ public class Igra {
 		
 		System.out.println("" + i.enote_polja.size());
 		
+		i.odigraj(new Koordinati(8, 5));
+		i.stanje_polja();
+		
 	}
 	
 	public enum Igralec {
@@ -275,7 +278,7 @@ public class Igra {
 	public boolean je_konec_igre() {
 		return (je_konec_igre_vodoravno(polje) ||
 			je_konec_igre_navpicno() || 
-			je_konec_igre_diagonalno1(polje) ||
+			je_konec_igre_diagonalno1(polje, false) ||
 			je_konec_igre_diagonalno2());
 	}
 	
@@ -317,7 +320,7 @@ public class Igra {
 	private Polje[][] zavrti90stopinj(Polje[][] polje2){
 		int x = dimenzija_polja_x();
 		int y = dimenzija_polja_y();
-		Polje[][] nova_matrika = new Polje[y][x];
+		Polje[][] nova_matrika = new Polje[x][y];
 		
 		for (int i = x - 1; i >= 0; i--) {
 			Polje[] nova_vrstica = new Polje[y];
@@ -335,7 +338,7 @@ public class Igra {
 		return je_konec_igre_vodoravno(transponiranka);
 	}
 	
-	public boolean je_konec_igre_diagonalno1(Polje[][] p) { // Prostor za morebitne polepšave.
+	public boolean je_konec_igre_diagonalno1(Polje[][] p, boolean zarotirana) { // Prostor za morebitne polepšave.
 		int y_dolzina = p.length;
 		int x_dolzina = p[0].length;
 		boolean kandidat = false;
@@ -346,7 +349,7 @@ public class Igra {
 			Polje vrednost = p[y][x];
 			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
-			while (je_veljavna_poteza(x, y)) {
+			while ((!zarotirana) ? je_veljavna_poteza(x, y) : je_veljavna_poteza(y, x)) {
 				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
@@ -376,7 +379,7 @@ public class Igra {
 			Polje vrednost = p[y][x];
 			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
-			while (je_veljavna_poteza(x, y)) {
+			while ((!zarotirana) ? je_veljavna_poteza(x, y) : je_veljavna_poteza(y, x)) {
 				vrednost = p[y][x];
 				if (vrednost == PRAZEN) {
 					x += 1;
@@ -404,7 +407,7 @@ public class Igra {
 
 	public boolean je_konec_igre_diagonalno2() {
 		Polje[][] zarotiranka = zavrti90stopinj(polje);
-		return je_konec_igre_diagonalno1(zarotiranka);
+		return je_konec_igre_diagonalno1(zarotiranka, true);
 	}
 	
 	public Stanje stanje() {

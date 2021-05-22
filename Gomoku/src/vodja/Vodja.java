@@ -15,20 +15,26 @@ import vmesnik.Okno;
 
 public class Vodja {	
 	
-	public static Map<Igralec,VrstaIgralca> vrstaIgralca;
-	public static Map<Igralec,KdoIgra> kdoIgra;
+	protected Map<Igralec,VrstaIgralca> vrstaIgralca;
+	protected Map<Igralec,KdoIgra> kdoIgra;
 	
-	public static Okno okno;
+	protected Okno okno;
 	
-	public static Igra igra = null;
+	protected Igra igra = null;
 	
-	public static boolean clovekNaVrsti = false;
+	protected boolean clovekNaVrsti = false;
+	
+	public Vodja(Okno okno, Map<Igralec, VrstaIgralca> vrstaIgralca, Map<Igralec, KdoIgra> kdoIgra) {
+		this.okno = okno;
+		this.vrstaIgralca = vrstaIgralca;
+		this.kdoIgra = kdoIgra;
+	}
 		
-	public static void igramoNovoIgro(int x, int y, String igralec1_ime, String igralec2_ime) {
+	public void igramoNovoIgro(int x, int y, String igralec1_ime, String igralec2_ime) {
 		igra = new Igra(x, y, igralec1_ime, igralec2_ime);
 	}
 	
-	public static void igramo() {
+	public void igramo() {
 		okno.osvezi_vmesnik();
 		switch (igra.stanje()) {
 		case ZMAGA_O: 
@@ -51,17 +57,15 @@ public class Vodja {
 	}
 
 	
-	public static Inteligenca racunalnikovaInteligenca = new Minimax(2);
+	public Inteligenca racunalnikovaInteligenca = new Minimax(2);
 	
-	public static void igrajRacunalnikovoPotezo() { // preveri pravilnost	
-		/*
+	public void igrajRacunalnikovoPotezo() { // preveri pravilnost	
 		Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
 		igra.odigraj(poteza);
 		okno.odigraj(poteza); //treba narediti, da platno črpa podatke iz igre
 		igramo();
-		*/
 		
-		
+		/*
 		Igra zacetkaIgra = igra;
 		SwingWorker<Koordinati, Void> worker = new SwingWorker<Koordinati, Void> () {
 			@Override
@@ -83,14 +87,19 @@ public class Vodja {
 			}
 		};
 		worker.execute();
+		*/
 		
 	
 	}
 		
-	public static void igrajClovekovoPotezo(Koordinati poteza) {
+	public void igrajClovekovoPotezo(Koordinati poteza) {
 		if (igra.odigraj(poteza)) clovekNaVrsti = false;
 		okno.osvezi_vmesnik();
 		igramo();
+	}
+	
+	public Igra igra() {
+		return this.igra;
 	}
 
 

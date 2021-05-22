@@ -6,7 +6,6 @@ public class Test {
 		Okno okno = new Okno();
 		okno.pack();
 		okno.setVisible(true);
-
 	}
 
 }

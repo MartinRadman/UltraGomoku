@@ -14,7 +14,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JColorChooser;
@@ -36,6 +39,7 @@ import vodja.VrstaIgralca;
 
 @SuppressWarnings("serial")
 public class Okno extends JFrame implements ActionListener {
+	protected Vodja vodja;
 	protected Platno platno;
 	
 	private Igra igra;
@@ -54,28 +58,28 @@ public class Okno extends JFrame implements ActionListener {
 		super();
 		setTitle("Gomoku");
 		
+		Map<Igralec, VrstaIgralca> vrstaIgralca = new EnumMap<Igralec, VrstaIgralca>(Igralec.class);
+		vrstaIgralca.put(Igralec.O, igralec1);
+		vrstaIgralca.put(Igralec.X, igralec2);
 		
-		Vodja.okno = this;
-		Vodja.vrstaIgralca = new EnumMap<Igralec,VrstaIgralca>(Igralec.class);
-		Vodja.vrstaIgralca.put(Igralec.O, igralec1); 
-		Vodja.vrstaIgralca.put(Igralec.X, igralec2);
-		Vodja.kdoIgra = new EnumMap<Igralec,KdoIgra>(Igralec.class);
-		Vodja.kdoIgra.put(Igralec.O, new KdoIgra(igralec1_ime)); 
-		Vodja.kdoIgra.put(Igralec.X, new KdoIgra(igralec2_ime));
-		Vodja.igramoNovoIgro(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
-
+		Map<Igralec, KdoIgra> kdoIgra = new EnumMap<Igralec, KdoIgra>(Igralec.class);
+		kdoIgra.put(Igralec.O, new KdoIgra(igralec1_ime));
+		kdoIgra.put(Igralec.X, new KdoIgra(igralec2_ime));
 		
-		igra = Vodja.igra;
+		Vodja vodja = new Vodja(this, vrstaIgralca, kdoIgra);
 		
+		vodja.igramoNovoIgro(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime);
 		
-		platno = new Platno(800, 800, this, igra);
+		igra = vodja.igra();
+		
+		platno = new Platno(800, 800, vodja, this, igra);
 		add(platno);
 		
 		String[] imena_igralcev = igra.imena_igralcev();
 		ime_igralca_1 = imena_igralcev[0];
 		ime_igralca_2 = imena_igralcev[1];
 		
-		Vodja.igramo();
+		vodja.igramo();
 		
 		//menuji
 		
@@ -102,6 +106,7 @@ public class Okno extends JFrame implements ActionListener {
 	public Okno() {
 		this(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.C);
 	}
+	 
 	
 	public JMenu dodajMenu(JMenuBar menubar, String naslov) {
 		JMenu menu = new JMenu(naslov);
@@ -197,8 +202,7 @@ public class Okno extends JFrame implements ActionListener {
 			JPanel okence = new JPanel();
 			JOptionPane.showMessageDialog(okence, "Igra je neodločena!", "Konec igre", JOptionPane.PLAIN_MESSAGE);
 		}
-		igra = new Igra();
-		
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 	
 	public void osvezi_vmesnik() {

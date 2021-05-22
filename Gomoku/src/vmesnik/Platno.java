@@ -2,6 +2,7 @@ package vmesnik;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Map;
 import java.awt.Rectangle;
@@ -13,30 +14,50 @@ import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import logika.Igra;
 
 import splosno.Koordinati;
 import vodja.Vodja;
+import vodja.VrstaIgralca;
 
 @SuppressWarnings("serial")
 public class Platno extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
 	
 	protected Color barva_igralca_1 = Color.BLACK;
 	protected Color barva_igralca_2 = Color.RED;
+	protected Color barva_ovala_1 = Color.DARK_GRAY;
+	protected Color barva_ovala_2 = Color.DARK_GRAY;
+	protected Color barva_ovala_3 = Color.DARK_GRAY;
 	protected Color barva_ozadja = Color.GRAY;
+	protected Color barva_pisave = Color.YELLOW;
+	protected Color aktivna_barva = Color.RED;
+	
 	public Igra igra;
 	protected HashMap<Integer, int[]> kvadratki;
 	protected HashMap<Integer, String> zemljevid_kvadratkov;
 	protected int stranica_kvadratka;
 	protected boolean prvi = true;
 	protected HashMap<String, HashSet<Integer>> izbrana_polja;
+	protected Vodja vodja;
 	protected Okno okno;
+	protected boolean osnovni_meni = true;
+	
+	protected int start;
+	protected int dolzina_naslova;
+	protected int v_polja;
+	protected int s_polja;
+	protected int velikost_pisave;
 
-	public Platno(int sirina, int visina, Okno okno, Igra igra) {
+	public Platno(int sirina, int visina, Vodja vodja, Okno okno, Igra igra) {
 		super();
 		setPreferredSize(new Dimension(sirina, visina));
+		this.vodja = vodja;
 		this.okno = okno;
 		this.igra = igra;
 	    this.izbrana_polja = new HashMap<String, HashSet<Integer>>();
@@ -56,76 +77,135 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 	protected void paintComponent(Graphics g) {
 		this.kvadratki = new HashMap<Integer, int[]>();
 		super.paintComponent(g);
-		
-		if (prvi) {			
-			g.setColor(barva_igralca_1);
-		}
-		else g.setColor(barva_igralca_2);
-		
 		Rectangle r = this.getBounds();
-		int v_polja = r.height;
-		int s_polja = r.width;
+		v_polja = r.height;
+		s_polja = r.width;
 		
-		
-		int dim_x = igra.dimenzija_polja_x() + 1;
-		int dim_y = igra.dimenzija_polja_y() + 1;
+		if (osnovni_meni) {
+			String naslov = "GOMOKU";
+			
+			velikost_pisave = (int) Math.min(0.1 * s_polja, 0.1 * v_polja);
+			g.setFont(new Font("Times New Roman", Font.PLAIN, velikost_pisave));
+			
+			dolzina_naslova = (int) g.getFontMetrics().getStringBounds(naslov, g).getWidth();
+			start = (int) Math.round(s_polja / 2) - dolzina_naslova / 2;
 
-		stranica_kvadratka = Math.min(v_polja / dim_y, s_polja / dim_x);
-		int sirina_igralnega_polja = stranica_kvadratka * dim_x;
-		int visina_igralnega_polja = stranica_kvadratka * dim_y;
-		int prazno_obmocje_x = s_polja - sirina_igralnega_polja;
-		int prazno_obmocje_y = v_polja - visina_igralnega_polja;
+			g.drawString(naslov, start, (int) Math.round(0.2 * v_polja));
+			
+			g.setColor(barva_ovala_1);
+			g.fillOval(start, (int) Math.round(0.4 * v_polja) - velikost_pisave / 2, dolzina_naslova, velikost_pisave / 2);
+			
+			g.setColor(barva_ovala_2);
+			g.fillOval(start, (int) Math.round(0.4 * v_polja) + velikost_pisave / 2, dolzina_naslova, velikost_pisave / 2);
+			
+			g.setColor(barva_ovala_3);
+			g.fillOval(start, (int) Math.round(0.4 * v_polja) + 3 * velikost_pisave / 2, dolzina_naslova, velikost_pisave / 2);
+			
+			
+			g.setColor(barva_pisave);
+			
+			String gumb1 = "NOVA IGRA";
+			
+			int velikost_pisave1 = (int) velikost_pisave / 3;
+			g.setFont(new Font("Times New Roman", Font.PLAIN, velikost_pisave1));
+			
+			int dolzina_naslova1 = (int) g.getFontMetrics().getStringBounds(gumb1, g).getWidth();
+			int start1 = (int) Math.round(s_polja / 2) - dolzina_naslova1 / 2;
+
+			g.drawString(gumb1, start1, (int) Math.round(0.4 * v_polja) - velikost_pisave1 / 2);
+			
+			
+			String gumb2 = "NOVA IGRA PROTI RAČUNALNIKU";
+			
+			int velikost_pisave2 = velikost_pisave / 5;
+			g.setFont(new Font("Times New Roman", Font.PLAIN, velikost_pisave2));
+			
+			int dolzina_naslova2 = (int) g.getFontMetrics().getStringBounds(gumb2, g).getWidth();
+			int start2 = (int) Math.round(s_polja / 2) - dolzina_naslova2 / 2;
+
+			g.drawString(gumb2, start2, (int) Math.round(0.4 * v_polja) + velikost_pisave - velikost_pisave2);
+			
+			
+			String gumb3 = "NOVA IGRA PO MERI";
+			
+			int velikost_pisave3 =velikost_pisave / 4;
+			g.setFont(new Font("Times New Roman", Font.PLAIN, velikost_pisave3));
+			
+			int dolzina_naslova3 = (int) g.getFontMetrics().getStringBounds(gumb3, g).getWidth();
+			int start3 = (int) Math.round(s_polja / 2) - dolzina_naslova3 / 2;
+
+			g.drawString(gumb3, start3, (int) Math.round(0.4 * v_polja) + 2 * velikost_pisave - velikost_pisave3 / 2);
+			
+			
+		}
 		
-		
-		for (int i = 0; i < dim_y; i++) {
-			for (int j = 0; j < dim_x; j++) {
-				if (i == 0) {
-					if (j == 0) { // Treba spremeniti design ikonce
-						g.fillOval(prazno_obmocje_x / 2 + stranica_kvadratka / 2,
-								   prazno_obmocje_y / 2 + stranica_kvadratka / 2,
-								   stranica_kvadratka / 2,
-								   stranica_kvadratka / 2);
-						g.setColor(Color.BLACK);
-						continue;
+		else {
+			if (prvi) {			
+				g.setColor(barva_igralca_1);
+			}
+			else g.setColor(barva_igralca_2);
+			
+			int dim_x = igra.dimenzija_polja_x() + 1;
+			int dim_y = igra.dimenzija_polja_y() + 1;
+	
+			stranica_kvadratka = Math.min(v_polja / dim_y, s_polja / dim_x);
+			int sirina_igralnega_polja = stranica_kvadratka * dim_x;
+			int visina_igralnega_polja = stranica_kvadratka * dim_y;
+			int prazno_obmocje_x = s_polja - sirina_igralnega_polja;
+			int prazno_obmocje_y = v_polja - visina_igralnega_polja;
+			
+			
+			for (int i = 0; i < dim_y; i++) {
+				for (int j = 0; j < dim_x; j++) {
+					if (i == 0) {
+						if (j == 0) { // Treba spremeniti design ikonce
+							g.fillOval(prazno_obmocje_x / 2 + stranica_kvadratka / 2,
+									   prazno_obmocje_y / 2 + stranica_kvadratka / 2,
+									   stranica_kvadratka / 2,
+									   stranica_kvadratka / 2);
+							g.setColor(Color.BLACK);
+							continue;
+						}
+						String vrednost = "" + j;
+						g.drawString(vrednost, (int) Math.round((j + 0.4) * stranica_kvadratka + prazno_obmocje_x / 2)
+								, (int) Math.round((i  + 0.8) * stranica_kvadratka + prazno_obmocje_y / 2));
 					}
-					String vrednost = "" + j;
-					g.drawString(vrednost, (int) Math.round((j + 0.4) * stranica_kvadratka + prazno_obmocje_x / 2)
-							, (int) Math.round((i  + 0.8) * stranica_kvadratka + prazno_obmocje_y / 2));
-				}
-				else{
-					if (j == 0) {
-						char crka = (char) (('A' + i) - 1);
-						String vrednost = Character.toString(crka);
-						g.drawString(vrednost, (int) Math.round((j + 0.65) * stranica_kvadratka + prazno_obmocje_x / 2)
-								, (int) Math.round((i  + 0.6) * stranica_kvadratka + prazno_obmocje_y / 2));
-					}
-					else {
-						g.drawRect(j * stranica_kvadratka + prazno_obmocje_x / 2,
-							       i * stranica_kvadratka + prazno_obmocje_y / 2,
-							       stranica_kvadratka, stranica_kvadratka);
-						int[] nova_tabela = new int[2];
-						nova_tabela[0] = (int) Math.round((j + 0.5) * stranica_kvadratka + prazno_obmocje_x / 2);
-						nova_tabela[1] = (int) Math.round((i + 0.5) * stranica_kvadratka + prazno_obmocje_y / 2);
-						this.kvadratki.put(i * dim_x + j, nova_tabela);
+					else{
+						if (j == 0) {
+							char crka = (char) (('A' + i) - 1);
+							String vrednost = Character.toString(crka);
+							g.drawString(vrednost, (int) Math.round((j + 0.65) * stranica_kvadratka + prazno_obmocje_x / 2)
+									, (int) Math.round((i  + 0.6) * stranica_kvadratka + prazno_obmocje_y / 2));
+						}
+						else {
+							g.drawRect(j * stranica_kvadratka + prazno_obmocje_x / 2,
+								       i * stranica_kvadratka + prazno_obmocje_y / 2,
+								       stranica_kvadratka, stranica_kvadratka);
+							int[] nova_tabela = new int[2];
+							nova_tabela[0] = (int) Math.round((j + 0.5) * stranica_kvadratka + prazno_obmocje_x / 2);
+							nova_tabela[1] = (int) Math.round((i + 0.5) * stranica_kvadratka + prazno_obmocje_y / 2);
+							this.kvadratki.put(i * dim_x + j, nova_tabela);
+						}
 					}
 				}
 			}
-		}
 		
 		
-		for (String  igralec : this.izbrana_polja.keySet()) {
-			if (this.izbrana_polja.get(igralec) != null) {
-				for (int izbranec : this.izbrana_polja.get(igralec)) { 
-					int[] tabela_koordinat = kvadratki.get(izbranec);
-					int x = tabela_koordinat[0];
-					int y = tabela_koordinat[1];
-					
-					if (igralec == "1") g.setColor(barva_igralca_1);
-					else g.setColor(barva_igralca_2);
-					
-					g.fillOval(x - (stranica_kvadratka / 4), y - (stranica_kvadratka / 4),
-							  (int) Math.round(stranica_kvadratka / 2),
-							  (int) Math.round(stranica_kvadratka / 2));
+		
+			for (String  igralec : this.izbrana_polja.keySet()) {
+				if (this.izbrana_polja.get(igralec) != null) {
+					for (int izbranec : this.izbrana_polja.get(igralec)) { 
+						int[] tabela_koordinat = kvadratki.get(izbranec);
+						int x = tabela_koordinat[0];
+						int y = tabela_koordinat[1];
+						
+						if (igralec == "1") g.setColor(barva_igralca_1);
+						else g.setColor(barva_igralca_2);
+						
+						g.fillOval(x - (stranica_kvadratka / 4), y - (stranica_kvadratka / 4),
+								  (int) Math.round(stranica_kvadratka / 2),
+								  (int) Math.round(stranica_kvadratka / 2));
+					}
 				}
 			}
 		}
@@ -155,32 +235,97 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
-		int dim_x = igra.dimenzija_polja_x();
-		for (Map.Entry<Integer, int[]> kvadratek : kvadratki.entrySet()) {
-			int kljuc = kvadratek.getKey();
-			if (kljuc <= dim_x || (kljuc % (dim_x + 1) == 0)) {
-				System.out.println("" + kljuc);
-				continue;
+		if (osnovni_meni) {
+			int x1 = start + dolzina_naslova / 2;
+			int y1 = (int) Math.round(0.4 * v_polja) - velikost_pisave / 2 + velikost_pisave / 4; // prepreči večkratni izračun koordinat
+			
+			int x2 = x1;
+			int y2 = (int) Math.round(0.4 * v_polja) + velikost_pisave / 2 + velikost_pisave / 4;
+			
+			int x3 = x1;
+			int y3 = (int) Math.round(0.4 * v_polja) + 3 * velikost_pisave / 2 + velikost_pisave / 4;
+			
+			if (Math.abs(x - x1) <= dolzina_naslova / 2 && Math.abs(y - y1) <= velikost_pisave / 2) {
+				Okno okno = new Okno();
+				okno.pack();
+				okno.setVisible(true);
+				okno.platno.osnovni_meni = false;
+				okno.osvezi_vmesnik();
+				okno.osvezi_vmesnik();
 			}
-			if (this.izbrana_polja.get("1").contains(kljuc) || this.izbrana_polja.get("2").contains(kljuc)) continue;
-			if (Math.abs(kvadratek.getValue()[0] - x) < (stranica_kvadratka / 2) &&
-					Math.abs(kvadratek.getValue()[1] - y) < (stranica_kvadratka / 2)) {
-				if (prvi) this.izbrana_polja.get("1").add(kvadratek.getKey());
-				else this.izbrana_polja.get("2").add(kvadratek.getKey());
-				this.prvi = !prvi;
-				Vodja.igrajClovekovoPotezo(this.pretvori_iz_kvadrata(kljuc));
-				break;
+			
+			if (Math.abs(x - x2) <= dolzina_naslova / 2 && Math.abs(y - y2) <= velikost_pisave / 2) {
+				Okno okno = new Okno(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.R);
+				okno.pack();
+				okno.setVisible(true);
+				okno.platno.osnovni_meni = false;
+				okno.osvezi_vmesnik();
+			}
+			
+			if (Math.abs(x - x3) <= dolzina_naslova / 2 && Math.abs(y - y3) <= velikost_pisave / 2) { // odpravi balastno kodo
+				 // Treba je popraviti okence
+				JTextField poljeVrstice = new JTextField(5);
+			    JTextField poljeStolpci = new JTextField(5);
+			    JTextField poljeIme1 = new JTextField(5);
+			    JTextField poljeIme2 = new JTextField(5);
+
+			    JPanel okence = new JPanel();
+			    okence.add(new JLabel("Število vrstic:"));
+			    okence.add(poljeVrstice);
+			    okence.add(Box.createHorizontalStrut(15)); // presledek
+			    okence.add(new JLabel("Število stolpcev:"));
+			    okence.add(poljeStolpci);
+			    okence.add(Box.createRigidArea(new Dimension(1, 1)));
+			    okence.add(new JLabel("Ime 1. igralca"));
+			    okence.add(poljeIme1);
+			    okence.add(new JLabel("Ime 2. igralca"));
+			    okence.add(poljeIme2);
+
+			    int rezultat = JOptionPane.showConfirmDialog(null, okence,
+			            "Prosimo vnesite zahtevane podatke", JOptionPane.OK_CANCEL_OPTION);
+			    
+			    if (rezultat == JOptionPane.OK_OPTION) { // debug vrsta igralca
+			    	int sirina_igralnega_polja = Integer.valueOf(poljeStolpci.getText());
+			    	int visina_igralnega_polja = Integer.valueOf(poljeVrstice.getText());
+			    	String igralec1_ime = poljeIme1.getText();
+			    	String igralec2_ime = poljeIme2.getText();
+			    	Okno okno = new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
+					okno.pack();
+					okno.setVisible(true);
+					okno.platno.osnovni_meni = false;
+					okno.osvezi_vmesnik();
+			    }
+			    
 			}
 		}
-		repaint();
-		if (igra.je_konec_igre()) {
-			okno.konec_igre(true);
-			this.nova_igra();
-		}
-		
-		if (igra.mnozica_potez().size() == 0) {
-			okno.konec_igre(false);
-			this.nova_igra();
+		else {
+			int dim_x = igra.dimenzija_polja_x();
+			for (Map.Entry<Integer, int[]> kvadratek : kvadratki.entrySet()) {
+				int kljuc = kvadratek.getKey();
+				if (kljuc <= dim_x || (kljuc % (dim_x + 1) == 0)) {
+					System.out.println("" + kljuc);
+					continue;
+				}
+				if (this.izbrana_polja.get("1").contains(kljuc) || this.izbrana_polja.get("2").contains(kljuc)) continue;
+				if (Math.abs(kvadratek.getValue()[0] - x) < (stranica_kvadratka / 2) &&
+						Math.abs(kvadratek.getValue()[1] - y) < (stranica_kvadratka / 2)) {
+					if (prvi) this.izbrana_polja.get("1").add(kvadratek.getKey());
+					else this.izbrana_polja.get("2").add(kvadratek.getKey());
+					this.prvi = !prvi;
+					vodja.igrajClovekovoPotezo(this.pretvori_iz_kvadrata(kljuc));
+					break;
+				}
+			}
+			repaint();
+			if (igra.je_konec_igre()) {
+				okno.konec_igre(true);
+				this.nova_igra();
+			}
+			
+			if (igra.mnozica_potez().size() == 0) {
+				okno.konec_igre(false);
+				this.nova_igra();
+			}
 		}
 	}
 	
@@ -203,14 +348,36 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+		int x = e.getX();
+		int y = e.getY();
 		
+		int x1 = start + dolzina_naslova / 2;
+		int y1 = (int) Math.round(0.4 * v_polja) - velikost_pisave / 2 + velikost_pisave / 4; // prepreči večkratni izračun koordinat
+		
+		int x2 = x1;
+		int y2 = (int) Math.round(0.4 * v_polja) + velikost_pisave / 2 + velikost_pisave / 4;
+		
+		int x3 = x1;
+		int y3 = (int) Math.round(0.4 * v_polja) + 3 * velikost_pisave / 2 + velikost_pisave / 4;
+		
+		if (Math.abs(x - x1) <= dolzina_naslova / 2 && Math.abs(y - y1) <= velikost_pisave / 2) {
+			barva_ovala_1 = Color.red;
+		}
+		
+		if (Math.abs(x - x2) <= dolzina_naslova / 2 && Math.abs(y - y2) <= velikost_pisave / 2) {
+			barva_ovala_2 = Color.red;
+		}
+		
+		if (Math.abs(x - x3) <= dolzina_naslova / 2 && Math.abs(y - y3) <= velikost_pisave / 2) { // odpravi balastno kodo
+			barva_ovala_3 = Color.red;		
+		}
+		repaint();
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		barva_ovala_1 = barva_ovala_2 = barva_ovala_3 = Color.DARK_GRAY;
+		repaint();
 	}
 
 	@Override
