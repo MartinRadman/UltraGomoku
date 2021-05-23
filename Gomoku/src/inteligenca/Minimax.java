@@ -1,5 +1,6 @@
 package inteligenca;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import logika.Igra.Igralec;
@@ -14,6 +15,8 @@ public class Minimax extends Inteligenca {
 	
 	private int globina;
 	
+	public HashMap<Koordinati, Integer> ocene = new HashMap<Koordinati, Integer>();
+	
 	public Minimax (int globina) {
 		super("minimax globina " + globina);
 		this.globina = globina;
@@ -22,6 +25,7 @@ public class Minimax extends Inteligenca {
 	@Override
 	public Koordinati izberiPotezo (Igra igra) {
 		OcenjenaPoteza najboljsaPoteza = minimax(igra, this.globina, igra.na_potezi());
+		izpis(ocene);
 		return najboljsaPoteza.poteza;	
 	}
 	
@@ -43,6 +47,7 @@ public class Minimax extends Inteligenca {
 				// globina > 1
 				else ocena = minimax(kopijaIgre, globina - 1, jaz).ocena;	
 			}
+			//ocene.put(p, ocena);
 			if (najboljsaPoteza == null 
 					// max, če je p moja poteza
 					|| jaz == igra.na_potezi() && ocena > najboljsaPoteza.ocena
@@ -52,5 +57,14 @@ public class Minimax extends Inteligenca {
 		}
 		return najboljsaPoteza;
 	}
+	
+	
+	public void izpis(HashMap<Koordinati, Integer> hm) {
+		String niz = "";
+		for (Koordinati k : hm.keySet()) {
+			System.out.println(niz + k + " Ocena: " + hm.get(k)); 
+		}
+	}
+	
 
 }

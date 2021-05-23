@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Map;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -14,11 +16,8 @@ import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import logika.Igra;
 
@@ -263,42 +262,62 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 			}
 			
 			if (Math.abs(x - x3) <= dolzina_naslova / 2 && Math.abs(y - y3) <= velikost_pisave / 2) { // odpravi balastno kodo
-				 // Treba je popraviti okence
-				JTextField poljeVrstice = new JTextField(5);
-			    JTextField poljeStolpci = new JTextField(5);
-			    JTextField poljeIme1 = new JTextField(5);
-			    JTextField poljeIme2 = new JTextField(5);
+				JFrame okence = new JFrame ("Igra po meri");
+		        Okence podatki = new Okence();
+		        okence.getContentPane().add(podatki);
+		        okence.pack();
+		        okence.setVisible (true);
+		        
+		        podatki.okay.addActionListener(new ActionListener() {
 
-			    JPanel okence = new JPanel();
-			    okence.add(new JLabel("Število vrstic:"));
-			    okence.add(poljeVrstice);
-			    okence.add(Box.createHorizontalStrut(15)); // presledek
-			    okence.add(new JLabel("Število stolpcev:"));
-			    okence.add(poljeStolpci);
-			    okence.add(Box.createRigidArea(new Dimension(1, 1)));
-			    okence.add(new JLabel("Ime 1. igralca"));
-			    okence.add(poljeIme1);
-			    okence.add(new JLabel("Ime 2. igralca"));
-			    okence.add(poljeIme2);
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		            	 Okno okno;
+		            	 // debug vrsta igralca
+		            	 	int sirina_igralnega_polja = podatki.x.getValue();
+		    			    if (sirina_igralnega_polja == 0) sirina_igralnega_polja = 15;
+		    			    
+		    			    int visina_igralnega_polja = podatki.y.getValue();
+		    			    if (visina_igralnega_polja == 0) visina_igralnega_polja = 15;
+		    			    
+		    			    String igralec1_ime = podatki.player_1.getText();
+		    			    if (igralec1_ime == null) igralec1_ime = "1. igralec";
+		    			    
+		    			    String igralec2_ime = podatki.player_2.getText();
+		    			    if (igralec2_ime == null) igralec2_ime = "2. igralec";
+		    			    
+		    			    boolean je_racunalnik_1 = podatki.comp_1.isSelected();
+		    			    boolean je_racunalnik_2 = podatki.comp_2.isSelected();
+		    			    
+		    			    if (je_racunalnik_1) {
+		    			    	okno = (je_racunalnik_2 == true) 
+		    			    	       ? new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.R, VrstaIgralca.R)
+		    			    	       : new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.R, VrstaIgralca.C);
+		    			    }
+		    			    else {
+		    			    	okno = (je_racunalnik_2 == true)
+		    			    		   ? new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.R)
+		    			    		   : new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
+		    			    }
+		    			    okence.dispose();
+		    			    okno.platno.osnovni_meni = false;
+		    			    okno.osvezi_vmesnik();
+		    			    okno.pack();
+		    				okno.setVisible(true);
+		            }
+		        });
+		        
+		        podatki.back.addActionListener(new ActionListener() {
 
-			    int rezultat = JOptionPane.showConfirmDialog(null, okence,
-			            "Prosimo vnesite zahtevane podatke", JOptionPane.OK_CANCEL_OPTION);
-			    
-			    if (rezultat == JOptionPane.OK_OPTION) { // debug vrsta igralca
-			    	int sirina_igralnega_polja = Integer.valueOf(poljeStolpci.getText());
-			    	int visina_igralnega_polja = Integer.valueOf(poljeVrstice.getText());
-			    	String igralec1_ime = poljeIme1.getText();
-			    	String igralec2_ime = poljeIme2.getText();
-			    	Okno okno = new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
-					okno.pack();
-					okno.setVisible(true);
-					okno.platno.osnovni_meni = false;
-					okno.osvezi_vmesnik();
-			    }
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		            	okence.dispose();
+		            }
+		        });
 			    
 			}
 		}
-		else {
+		else if (vodja.clovekNaVrsti()) {
 			int dim_x = igra.dimenzija_polja_x();
 			for (Map.Entry<Integer, int[]> kvadratek : kvadratki.entrySet()) {
 				int kljuc = kvadratek.getKey();
@@ -317,15 +336,6 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 				}
 			}
 			repaint();
-			if (igra.je_konec_igre()) {
-				okno.konec_igre(true);
-				this.nova_igra();
-			}
-			
-			if (igra.mnozica_potez().size() == 0) {
-				okno.konec_igre(false);
-				this.nova_igra();
-			}
 		}
 	}
 	
@@ -333,7 +343,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 		String zemljevidne_koordinate = this.zemljevid_kvadratkov.get(n);
 		char crka = zemljevidne_koordinate.charAt(0);
 		String stevilo = zemljevidne_koordinate.substring(1);
-		return new Koordinati(crka - 'A', Integer.valueOf(stevilo));
+		return new Koordinati(Integer.valueOf(stevilo), crka - 'A');
 	}
 	
 	public void nova_igra() { // Treba je nastaviti, da ohrani uporabnikove nastavitve

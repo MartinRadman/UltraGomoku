@@ -11,24 +11,19 @@ package vmesnik;
 
 import java.awt.Color;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.JColorChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import logika.Igra;
 import logika.Igra.Igralec;
@@ -36,6 +31,7 @@ import splosno.KdoIgra;
 import splosno.Koordinati;
 import vodja.Vodja;
 import vodja.VrstaIgralca;
+
 
 @SuppressWarnings("serial")
 public class Okno extends JFrame implements ActionListener {
@@ -50,9 +46,11 @@ public class Okno extends JFrame implements ActionListener {
 	private JMenuItem menuBarvaIgralca1;
 	private JMenuItem menuBarvaIgralca2;
 	
-	private JMenuItem igraClovekRacunalnik;
 	private JMenuItem menuOsnovnaIgra;
+	private JMenuItem menuIgraProtiRacunalniku;
 	private JMenuItem menuIgraPoMeri;
+	
+	public int rezultat;
 	
 	public Okno(int sirina_igralnega_polja, int visina_igralnega_polja, String igralec1_ime, String igralec2_ime, VrstaIgralca igralec1, VrstaIgralca igralec2) {
 		super();
@@ -89,9 +87,8 @@ public class Okno extends JFrame implements ActionListener {
 		JMenu menuIgra = dodajMenu(menubar, "Igra");
 		JMenu menuNovaIgra = dodajMenuNaMenu(menuIgra, "Nova igra");
 		
-		igraClovekRacunalnik = dodajMenuItem(menuNovaIgra, "Človek – računalnik");
-		
 		menuOsnovnaIgra = dodajMenuItem(menuNovaIgra, "Nova osnovna igra");
+		menuIgraProtiRacunalniku = dodajMenuItem(menuNovaIgra, "Nova igra proti računalniku");
 		menuIgraPoMeri = dodajMenuItem(menuNovaIgra, "Nova igra po meri ...");
 		
 		JMenu menuPrilagoditve = dodajMenu(menubar, "Prilagoditve");
@@ -152,43 +149,71 @@ public class Okno extends JFrame implements ActionListener {
 			okno.setVisible(true);
 		}
 		
-		if (source == menuIgraPoMeri) { // Treba je popraviti okence
-			JTextField poljeVrstice = new JTextField(5);
-		    JTextField poljeStolpci = new JTextField(5);
-		    JTextField poljeIme1 = new JTextField(5);
-		    JTextField poljeIme2 = new JTextField(5);
-
-		    JPanel okence = new JPanel();
-		    okence.add(new JLabel("Število vrstic:"));
-		    okence.add(poljeVrstice);
-		    okence.add(Box.createHorizontalStrut(15)); // presledek
-		    okence.add(new JLabel("Število stolpcev:"));
-		    okence.add(poljeStolpci);
-		    okence.add(Box.createRigidArea(new Dimension(1, 1)));
-		    okence.add(new JLabel("Ime 1. igralca"));
-		    okence.add(poljeIme1);
-		    okence.add(new JLabel("Ime 2. igralca"));
-		    okence.add(poljeIme2);
-
-		    int rezultat = JOptionPane.showConfirmDialog(null, okence,
-		            "Prosimo vnesite zahtevane podatke", JOptionPane.OK_CANCEL_OPTION);
-		    
-		    if (rezultat == JOptionPane.OK_OPTION) { // debug vrsta igralca
-		    	int sirina_igralnega_polja = Integer.valueOf(poljeStolpci.getText());
-		    	int visina_igralnega_polja = Integer.valueOf(poljeVrstice.getText());
-		    	String igralec1_ime = poljeIme1.getText();
-		    	String igralec2_ime = poljeIme2.getText();
-		    	Okno okno = new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
-				okno.pack();
-				okno.setVisible(true);
-		    }
-	    }
-		
-		if (e.getSource() == igraClovekRacunalnik) {
-			Okno novo_okno = new Okno(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.R);
-			novo_okno.pack();
-			novo_okno.setVisible(true);
+		if (source == menuIgraProtiRacunalniku) {
+			Okno okno = new Okno(15, 15, "1. igralec", "2. igralec", VrstaIgralca.C, VrstaIgralca.R);
+			okno.pack();
+			okno.setVisible(true);
+			okno.platno.osnovni_meni = false;
+			okno.osvezi_vmesnik();
 		}
+		
+		if (source == menuIgraPoMeri) {
+			JFrame okence = new JFrame ("Igra po meri");
+	        Okence podatki = new Okence();
+	        okence.getContentPane().add(podatki);
+	        okence.pack();
+	        okence.setVisible (true);
+	        
+	        podatki.okay.addActionListener(new ActionListener() {
+
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	            	 Okno okno;
+	            	 // debug vrsta igralca
+	    			    int sirina_igralnega_polja = podatki.x.getValue();
+	    			    if (sirina_igralnega_polja == 0) sirina_igralnega_polja = 15;
+	    			    
+	    			    int visina_igralnega_polja = podatki.y.getValue();
+	    			    if (visina_igralnega_polja == 0) visina_igralnega_polja = 15;
+	    			    
+	    			    String igralec1_ime = podatki.player_1.getText();
+	    			    if (igralec1_ime == null) igralec1_ime = "1. igralec";
+	    			    
+	    			    String igralec2_ime = podatki.player_2.getText();
+	    			    if (igralec2_ime == null) igralec2_ime = "2. igralec";
+	    			    
+	    			    boolean je_racunalnik_1 = podatki.comp_1.isSelected();
+	    			    boolean je_racunalnik_2 = podatki.comp_2.isSelected();
+	    			    
+	    			    if (je_racunalnik_1) {
+	    			    	okno = (je_racunalnik_2 == true) 
+	    			    	       ? new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.R, VrstaIgralca.R)
+	    			    	       : new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.R, VrstaIgralca.C);
+	    			    }
+	    			    else {
+	    			    	okno = (je_racunalnik_2 == true)
+	    			    		   ? new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.R)
+	    			    		   : new Okno(sirina_igralnega_polja, visina_igralnega_polja, igralec1_ime, igralec2_ime, VrstaIgralca.C, VrstaIgralca.C);
+	    			    }
+	    			    okence.dispose();
+	    			    okno.platno.osnovni_meni = false;
+	    			    okno.osvezi_vmesnik();
+	    			    okno.pack();
+	    				okno.setVisible(true);
+	            }
+	        });
+	        
+	        podatki.back.addActionListener(new ActionListener() {
+
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	            	okence.dispose();
+	            }
+	        });
+	       
+	        
+		    
+	    }
 	}
 	
 	public void konec_igre(boolean je_zmaga) {

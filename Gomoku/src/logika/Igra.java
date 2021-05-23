@@ -35,21 +35,10 @@ public class Igra {
 		i.zamenjaj_igralca();
 		i.odigraj(new Koordinati(4, 4));
 
-		i.stanje_polja();
-		System.out.println(i.je_konec_igre());
-		
-		i.polje = i.zavrti90stopinj(i.polje);
-		i.stanje_polja();
-		
-		int[] a = {1, 2, 3};
-		int[] b = a;
-		b[0] = 0;
-		System.out.println("" + a[0]);
-		
-		System.out.println("" + i.enote_polja.size());
-		
-		i.odigraj(new Koordinati(8, 5));
-		i.stanje_polja();
+		Igra ki = new Igra(i);
+		ki.zamenjaj_igralca();
+		ki.odigraj(new Koordinati(5, 5));
+		ki.stanje_polja();
 		
 	}
 	
@@ -104,6 +93,8 @@ public class Igra {
 		
 		this.igralec_na_potezi = igra.igralec_na_potezi;
 		this.polje = kopija_matrike(igra.polje);
+		this.mnozica_potez = new HashSet<Koordinati>(igra.mnozica_potez);
+		this.mnozica_izvedenih_potez = new HashSet<Koordinati>(igra.mnozica_izvedenih_potez);
 	}
 	
 	private Polje[][] kopija_matrike(Polje[][] matrika) {
@@ -223,9 +214,11 @@ public class Igra {
 		int y_izbrani = koordinati.getY();
 		int x_izbrani = koordinati.getX();
 		if (!je_veljavna_poteza(x_izbrani, y_izbrani)) return false;
-		
 		Polje izbrano_mesto = polje[y_izbrani][x_izbrani];
-		if (izbrano_mesto != PRAZEN) return false;
+		if (izbrano_mesto != PRAZEN) {
+			
+			return false;
+		}
 		else {
 			Polje aktivna_crka = igralci.get(igralec_na_potezi.ime()).getPolje();
 			polje[y_izbrani][x_izbrani] = aktivna_crka;

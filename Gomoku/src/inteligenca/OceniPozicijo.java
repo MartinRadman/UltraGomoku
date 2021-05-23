@@ -2,6 +2,7 @@ package inteligenca;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,10 +38,10 @@ public class OceniPozicijo {
 		List<int[]> diagonala = diagonala(igra, x, y);
 		List<int[]> antidiagonala = antidiagonala(igra, x, y);
 		
-		vrednost_polj = oceni_enoto(stolpec, k, jaz, igra, vrednost_polj);
-		vrednost_polj = oceni_enoto(vrstica, k, jaz, igra, vrednost_polj);
-		vrednost_polj = oceni_enoto(diagonala, k, jaz, igra, vrednost_polj);
-		vrednost_polj = oceni_enoto(antidiagonala, k, jaz, igra, vrednost_polj);
+		vrednost_polj = oceni_enoto(stolpec, k, jaz, igra, vrednost_polj, false);
+		vrednost_polj = oceni_enoto(vrstica, k, jaz, igra, vrednost_polj, false);
+		vrednost_polj = oceni_enoto(diagonala, k, jaz, igra, vrednost_polj, false);
+		vrednost_polj = oceni_enoto(antidiagonala, k, jaz, igra, vrednost_polj, false);
 		
 		return sum(vrednost_polj.values());	
 	}
@@ -97,15 +98,56 @@ public class OceniPozicijo {
 		return antidiagonala;
 	}
 	
-	public static HashMap<Koordinati, Integer> oceni_enoto(List<int[]> enota, Koordinati k, Igralec jaz, Igra igra, HashMap<Koordinati, Integer> vrednost_polj) {
+	public static HashMap<Koordinati, Integer> oceni_enoto(List<int[]> enota, Koordinati k, Igralec jaz, Igra igra, HashMap<Koordinati, Integer> vrednost_polj, boolean druga) {
 		Polje[][] polje = igra.polje();
 		int x = k.getX();
 		int y = k.getY();
 		Igralec igralec = polje[y][x].getIgralec();
-		int faktor = (jaz == igralec) ? 1 : -1;
+		int faktor_desni= 1;
+		int stevec = 0;
+		boolean desna = false;
+		for (int[] koordinati : enota) {
+			stevec++;
+			if (stevec == 5) {
+				desna = true;
+				break;
+			}
+			if (polje[koordinati[1]][koordinati[0]] != Polje.PRAZEN) {
+				Koordinati koord = new Koordinati(x, y);
+				if (!desna) {
+					switch (razdalja_polj(koord, k)) {
+					case 1: 
+						switch (faktor_desni) {
+						case 32: faktor_desni = 2000;
+						case 24: faktor_desni = 700;
+						case 12: faktor_desni = 300;
+						case 8: faktor_desni = 140;
+						case 6: faktor_desni = 64;
+						case 4: faktor_desni = 28;
+						case 2: faktor_desni = 20;
+						default: faktor_desni = 16;
+					    }
+					break;
+					
+					case 2: 
+						switch (faktor_desni) {
+						case 6: faktor_desni = 32; break;
+						case 4: faktor_desni = 24; break;
+						case 2: faktor_desni = 12;
+						default: faktor_desni = 8; break;
+						}
+				    break;
+					
+					case 3: if (faktor_desni == 2) faktor_desni = 6; else faktor_desni = 4; break;
+					case 4: faktor_desni = 2; break;
+					default: faktor_desni = 1;
+					}
+				}	
+			}
+		}
 		for (int[] koordinati : enota) {
 			if (polje[koordinati[1]][koordinati[0]] == Polje.PRAZEN) {
-				Koordinati koord = new Koordinati(x, y);
+				Koordinati koord = new Koordinati(koordinati[0], koordinati[1]);
 				int nova_ocena;
 				switch (razdalja_polj(koord, k)) {
 				case 1: nova_ocena = 16; break;
@@ -114,11 +156,13 @@ public class OceniPozicijo {
 				case 4: nova_ocena = 2; break;
 				default: nova_ocena = 0;
 				}
-				int ocena = vrednost_polj.getOrDefault(koord, 0) + nova_ocena * faktor;
+				int ocena = vrednost_polj.getOrDefault(koord, 0) + nova_ocena * faktor_desni;
 				vrednost_polj.put(koord, ocena);
 			}
 		}
-		return vrednost_polj;
+		Collections.reverse(enota);
+		if (!druga) return oceni_enoto(enota, k, jaz, igra, vrednost_polj, true);
+		else return vrednost_polj;
 	}
 	
 	private static int razdalja_polj(Koordinati a, Koordinati b) {
@@ -141,4 +185,6 @@ public class OceniPozicijo {
 	
 
 }
+
+
 

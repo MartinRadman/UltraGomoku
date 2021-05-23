@@ -37,10 +37,10 @@ public class Vodja {
 	public void igramo() {
 		okno.osvezi_vmesnik();
 		switch (igra.stanje()) {
-		case ZMAGA_O: 
-		case ZMAGA_X: 
-		case NEODLOCENO: 
-			return; // odhajamo iz metode igramo
+		case ZMAGA_O: okno.konec_igre(true); return; 
+		case ZMAGA_X: okno.konec_igre(true); return;
+		case NEODLOCENO: okno.konec_igre(false); return;
+		// odhajamo iz metode igramo
 		case V_TEKU: 
 			Igralec igralec = igra.na_potezi();
 			VrstaIgralca vrstaNaPotezi = vrstaIgralca.get(igralec);
@@ -57,37 +57,41 @@ public class Vodja {
 	}
 
 	
-	public Inteligenca racunalnikovaInteligenca = new Minimax(2);
+	public Inteligenca racunalnikovaInteligenca = new Minimax(1);
 	
-	public void igrajRacunalnikovoPotezo() { // preveri pravilnost	
-		Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
-		igra.odigraj(poteza);
-		okno.odigraj(poteza); //treba narediti, da platno črpa podatke iz igre
-		igramo();
-		
+	public void igrajRacunalnikovoPotezo() { // preveri pravilnost
 		/*
-		Igra zacetkaIgra = igra;
+		Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
+		okno.odigraj(poteza); //treba narediti, da platno črpa podatke iz igre
+		igra.odigraj(poteza);
+		igramo();
+		*/
+
+		
+		
+		Igra zacetekIgra = igra;
 		SwingWorker<Koordinati, Void> worker = new SwingWorker<Koordinati, Void> () {
 			@Override
 			protected Koordinati doInBackground() {
 				Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
-				try {TimeUnit.SECONDS.sleep(1);} catch (Exception e) {};
-				System.out.println("doInBackground " + poteza);
+				try {TimeUnit.MICROSECONDS.sleep(1);} catch (Exception e) {};
 				return poteza;
 			}
 			@Override
-			protected void done () {
+			protected void done() {
 				Koordinati poteza = null; 
 				try {poteza = get();} catch (Exception e) {};	
-				System.out.println("done " + poteza);
-				if (igra == zacetkaIgra) {
+				if (igra == zacetekIgra) {
 					igra.odigraj(poteza);
+					okno.odigraj(poteza);
+					if (igra.je_konec_igre()) {
+						okno.konec_igre(true);
+					}
 					igramo();
 				}
 			}
 		};
 		worker.execute();
-		*/
 		
 	
 	}
@@ -100,6 +104,10 @@ public class Vodja {
 	
 	public Igra igra() {
 		return this.igra;
+	}
+	
+	public boolean clovekNaVrsti() {
+		return clovekNaVrsti;
 	}
 
 
