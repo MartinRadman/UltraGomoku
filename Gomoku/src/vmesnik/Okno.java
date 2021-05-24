@@ -177,10 +177,14 @@ public class Okno extends JFrame implements ActionListener {
 	    			    if (visina_igralnega_polja == 0) visina_igralnega_polja = 15;
 	    			    
 	    			    String igralec1_ime = podatki.player_1.getText();
-	    			    if (igralec1_ime == null) igralec1_ime = "1. igralec";
+	    			    if (igralec1_ime.isBlank()) igralec1_ime = "1. igralec";
 	    			    
 	    			    String igralec2_ime = podatki.player_2.getText();
-	    			    if (igralec2_ime == null) igralec2_ime = "2. igralec";
+	    			    if (igralec2_ime.isBlank()) igralec2_ime = "2. igralec";
+	    			    if (igralec2_ime.equals(igralec1_ime)) {
+	    			    	igralec1_ime = igralec1_ime + " (1)";
+	    			    	igralec2_ime = igralec2_ime + " (2)";
+	    			    }
 	    			    
 	    			    boolean je_racunalnik_1 = podatki.comp_1.isSelected();
 	    			    boolean je_racunalnik_2 = podatki.comp_2.isSelected();
@@ -239,7 +243,7 @@ public class Okno extends JFrame implements ActionListener {
 		kvadratek[0] = poteza.getX();
 		kvadratek[1] = poteza.getY();
 		System.out.println("" + kvadratek[0] + " " + kvadratek[1]);
-		int st_kvadratka = (kvadratek[1] + 1) * 16 + kvadratek[0] + 1;
+		int st_kvadratka = (kvadratek[1] + 1) * (igra.dimenzija_polja_x() + 1) + kvadratek[0] + 1;
  		if (platno.prvi) platno.izbrana_polja.get("1").add(st_kvadratka);
 		else platno.izbrana_polja.get("2").add(st_kvadratka);
 		platno.prvi = !platno.prvi;

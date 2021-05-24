@@ -1,6 +1,6 @@
 package vmesnik;
 
-public class Test {
+public class Launcher {
 
 	public static void main(String[] args) {
 		Okno okno = new Okno();

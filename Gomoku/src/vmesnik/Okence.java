@@ -22,8 +22,10 @@ public class Okence extends JPanel {
         //construct components
         player_1 = new JTextField (5);
         player_2 = new JTextField (5);
-        x = new JSlider (0, 50);
-        y = new JSlider (0, 50);
+        x = new JSlider (0, 25);
+        x.setValue(15);
+        y = new JSlider (0, 25);
+        y.setValue(15);
         comp_1 = new JCheckBox ("Računalnik");
         comp_2 = new JCheckBox ("Računalnik");
         okay = new JButton ("Začni");

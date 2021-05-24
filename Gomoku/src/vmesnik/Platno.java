@@ -1,9 +1,11 @@
 package vmesnik;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Map;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -15,6 +17,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -76,6 +79,9 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 	protected void paintComponent(Graphics g) {
 		this.kvadratki = new HashMap<Integer, int[]>();
 		super.paintComponent(g);
+		
+		Graphics2D g2 = (Graphics2D)g;
+		
 		Rectangle r = this.getBounds();
 		v_polja = r.height;
 		s_polja = r.width;
@@ -208,6 +214,28 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 				}
 			}
 		}
+		
+		
+		if (igra.je_konec_igre()) {
+			g2.setColor(new Color(255,215,0));
+			g2.setStroke(new BasicStroke((int) (0.1 * stranica_kvadratka)));
+			List<Koordinati> zmagovalna_poteza = igra.zmagovalna_poteza();
+			
+			Koordinati kvadratek1 = zmagovalna_poteza.get(0);
+			Koordinati kvadratek2 = zmagovalna_poteza.get(zmagovalna_poteza.size() - 1);
+			
+			int st_kvadratka1 = (kvadratek1.getY() + 1) * (igra.dimenzija_polja_x() + 1) + kvadratek1.getX() + 1;
+			int st_kvadratka2 = (kvadratek2.getY() + 1) * (igra.dimenzija_polja_x() + 1) + kvadratek2.getX() + 1;
+			
+			int[] sredisce1 = kvadratki.get(st_kvadratka1);
+			int[] sredisce2 = kvadratki.get(st_kvadratka2);
+			
+			g.drawLine(sredisce1[0], sredisce1[1], sredisce2[0], sredisce2[1]);
+			for(Koordinati poteza : zmagovalna_poteza) {
+			//	System.out.println(poteza);
+			}
+		}
+		
 	}
 	
 	public void kartiranje_kvadratkov() {
@@ -281,10 +309,14 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 		    			    if (visina_igralnega_polja == 0) visina_igralnega_polja = 15;
 		    			    
 		    			    String igralec1_ime = podatki.player_1.getText();
-		    			    if (igralec1_ime == null) igralec1_ime = "1. igralec";
+		    			    if (igralec1_ime.isBlank()) igralec1_ime = "1. igralec";
 		    			    
 		    			    String igralec2_ime = podatki.player_2.getText();
-		    			    if (igralec2_ime == null) igralec2_ime = "2. igralec";
+		    			    if (igralec2_ime.isBlank()) igralec2_ime = "2. igralec";
+		    			    if (igralec2_ime.equals(igralec1_ime)) {
+		    			    	igralec1_ime = igralec1_ime + " (1)";
+		    			    	igralec2_ime = igralec2_ime + " (2)";
+		    			    }
 		    			    
 		    			    boolean je_racunalnik_1 = podatki.comp_1.isSelected();
 		    			    boolean je_racunalnik_2 = podatki.comp_2.isSelected();

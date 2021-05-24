@@ -57,17 +57,9 @@ public class Vodja {
 	}
 
 	
-	public Inteligenca racunalnikovaInteligenca = new Minimax(1);
+	public Minimax racunalnikovaInteligenca = new Minimax(1);
 	
-	public void igrajRacunalnikovoPotezo() { // preveri pravilnost
-		/*
-		Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
-		okno.odigraj(poteza); //treba narediti, da platno črpa podatke iz igre
-		igra.odigraj(poteza);
-		igramo();
-		*/
-
-		
+	public void igrajRacunalnikovoPotezo() {
 		
 		Igra zacetekIgra = igra;
 		SwingWorker<Koordinati, Void> worker = new SwingWorker<Koordinati, Void> () {
@@ -79,19 +71,18 @@ public class Vodja {
 			}
 			@Override
 			protected void done() {
-				Koordinati poteza = null; 
+				Koordinati poteza = null;
 				try {poteza = get();} catch (Exception e) {};	
 				if (igra == zacetekIgra) {
 					igra.odigraj(poteza);
 					okno.odigraj(poteza);
-					if (igra.je_konec_igre()) {
-						okno.konec_igre(true);
-					}
+					okno.osvezi_vmesnik();
 					igramo();
 				}
 			}
 		};
 		worker.execute();
+		
 		
 	
 	}

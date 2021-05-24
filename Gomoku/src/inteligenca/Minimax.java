@@ -22,7 +22,7 @@ public class Minimax extends Inteligenca {
 		this.globina = globina;
 	}
 	
-	@Override
+
 	public Koordinati izberiPotezo (Igra igra) {
 		OcenjenaPoteza najboljsaPoteza = minimax(igra, this.globina, igra.na_potezi());
 		izpis(ocene);

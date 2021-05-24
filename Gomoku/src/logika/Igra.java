@@ -1,6 +1,8 @@
 package logika;
 
 import java.util.List;
+
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ public class Igra {
 	protected List<EnotaPolja> enote_polja;
 	protected HashSet<Koordinati> mnozica_potez = new HashSet<Koordinati>();
 	protected HashSet<Koordinati> mnozica_izvedenih_potez = new HashSet<Koordinati>();
+	protected List<Koordinati> zmagovalna_poteza = new ArrayList<Koordinati>();
 	
 	public static void main(String[] args) throws Exception {
 		Igra i = new Igra();
@@ -60,6 +63,11 @@ public class Igra {
 		public Igralec getIgralec() {
 			return (this == X ? Igralec.X : Igralec.O);
 		}
+		
+		public String toString() {
+			if (this == PRAZEN) return "prazen";
+			return (this == X ? "X" : "O");
+		}
 	}
 	
 	public enum Stanje {
@@ -74,10 +82,10 @@ public class Igra {
 		igralci.put(igralec1.ime(), BELI);
 		igralci.put(igralec2.ime(), CRNI);
 		igralec_na_potezi = igralec1;
-		enote_polja = new ArrayList<EnotaPolja>();
+		// enote_polja = new ArrayList<EnotaPolja>();
 		
 		napolni_polje_s_praznimi();
-		zgradi_enote_polja();
+		// zgradi_enote_polja();
 		napolni_poteze();
 	}
 	
@@ -117,6 +125,7 @@ public class Igra {
 		}
 	}
 	
+	/*
 	public void zgradi_enote_polja() { // Treba preveriti ali deluje pravilno (načeloma ja)
 		zgradi_vrstice_ali_stolpce(true);
 		zgradi_vrstice_ali_stolpce(false);
@@ -208,6 +217,7 @@ public class Igra {
 			enote_polja.add(new EnotaPolja(diagonala));
 		}
 	}
+	*/
 	
 	
 	public boolean odigraj(Koordinati koordinati) {
@@ -269,38 +279,51 @@ public class Igra {
 	}
 	
 	public boolean je_konec_igre() {
-		return (je_konec_igre_vodoravno(polje) ||
+		if (je_konec_igre_vodoravno(polje, false) ||
+				je_konec_igre_navpicno() || 
+				je_konec_igre_diagonalno1(polje, false) ||
+				je_konec_igre_diagonalno2()) stanje_polja();
+		return (je_konec_igre_vodoravno(polje, false) ||
 			je_konec_igre_navpicno() || 
 			je_konec_igre_diagonalno1(polje, false) ||
 			je_konec_igre_diagonalno2());
 	}
 	
-	public boolean je_konec_igre_vodoravno(Polje[][] p) {
-		boolean kandidat = false; // Ali je trenutno zaporedje dolgo vsaj 5?
+	public boolean je_konec_igre_vodoravno(Polje[][] p, boolean navpicno) {
+		int koord_vrstice = 0;
+		int koord_stolpca = 0;
+		Koordinati zacetne_koordinate = new Koordinati(0, 0);
 		for (Polje[] vrstica : p) {
-			if (kandidat) return true;
 			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 1;
 			for (Polje vrednost : vrstica) {
 				if (vrednost == PRAZEN) {
 					trenutna_vrednost = PRAZEN;
+					koord_stolpca++;
 					continue;
 				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec >= 5) kandidat = true;
+					if (stevec >= 5) {
+						zmagovalna_poteza(zacetne_koordinate, (!navpicno) ? "vodoravno" : "navpicno");
+						return true;
+					}
 				}
 				else {
+					zacetne_koordinate = new Koordinati(koord_stolpca, koord_vrstice);
 					trenutna_vrednost = vrednost;
 					stevec = 1;
-					if (kandidat) return true;
 				}
+				koord_stolpca++;
 			}
+			koord_vrstice++;
+			koord_stolpca = 0;
 		}
 		return false;
 	}
 	
-	private Polje[][] transponiraj(Polje[][] polje2) {
+	private Polje[][] transponiraj(Polje[][] polje) {
+		Polje[][] polje2 = kopija_matrike(polje);
         Polje[][] b = new Polje[polje2[0].length][polje2.length];
         for (int i = 0; i < polje2.length; i++) {
             for (int j = 0; j < polje2[0].length; j++) {
@@ -328,17 +351,16 @@ public class Igra {
 	
 	public boolean je_konec_igre_navpicno() {
 		Polje[][] transponiranka = transponiraj(polje);
-		return je_konec_igre_vodoravno(transponiranka);
+		return je_konec_igre_vodoravno(transponiranka, true);
 	}
 	
 	public boolean je_konec_igre_diagonalno1(Polje[][] p, boolean zarotirana) { // Prostor za morebitne polepšave.
 		int y_dolzina = p.length;
 		int x_dolzina = p[0].length;
-		boolean kandidat = false;
+		Koordinati zacetne_koordinate = new Koordinati(0, 0);
 		for (int odmik = 0; odmik < x_dolzina; odmik++) {
 			int x = 0 + odmik;
 			int y = 0;
-			if (kandidat) return true;
 			Polje vrednost = p[y][x];
 			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
@@ -352,12 +374,15 @@ public class Igra {
 				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec >= 5) kandidat = true;
+					if (stevec >= 5) {
+						zmagovalna_poteza(zacetne_koordinate, (zarotirana) ? "antidiagonalno" : "diagonalno");
+						return true;
+					}
 				}
 				else {
 					trenutna_vrednost = vrednost;
 					stevec = 1;
-					if (kandidat) return true;
+					zacetne_koordinate = new Koordinati(x, y);
 				}
 				x += 1;
 				y += 1;
@@ -368,7 +393,6 @@ public class Igra {
 		for (int odmik = 0; odmik < y_dolzina; odmik++) {
 			int x = 0;
 			int y = 0 + odmik;
-			if (kandidat) return true;
 			Polje vrednost = p[y][x];
 			Polje trenutna_vrednost = PRAZEN; // Neopredeljena vrednost
 			int stevec = 0;
@@ -382,12 +406,15 @@ public class Igra {
 				}
 				if (vrednost == trenutna_vrednost) {
 					stevec++;
-					if (stevec >= 5) kandidat = true;
+					if (stevec >= 5) {
+						zmagovalna_poteza(zacetne_koordinate, (zarotirana) ? "antidiagonalno" : "diagonalno");
+						return true;
+					}
 				}
 				else {
 					trenutna_vrednost = vrednost;
 					stevec = 1;
-					if (kandidat) return true;
+					zacetne_koordinate = new Koordinati(x, y);
 				}
 				x += 1;
 				y += 1;
@@ -402,6 +429,62 @@ public class Igra {
 		Polje[][] zarotiranka = zavrti90stopinj(polje);
 		return je_konec_igre_diagonalno1(zarotiranka, true);
 	}
+	
+	public void zmagovalna_poteza(Koordinati zacetna, String smer) {
+		int x = zacetna.getX();
+		int y = zacetna.getY();
+		int pomozni = x;
+		System.out.println(zacetna);
+		Polje tip = polje[y][x];
+		
+		if(smer.equals("navpicno") || smer.equals("antidiagonalno")) {
+			tip = (smer.equals("navpicno")) ? polje[pomozni][y] : polje[pomozni][(dimenzija_polja_x() - 1) - y];
+		}
+		
+		Polje nov_tip = tip;
+		
+		switch (smer) {
+		case "vodoravno":
+			while (nov_tip == tip && je_veljavna_poteza(x, y)) {
+				zmagovalna_poteza.add(new Koordinati(x, y));
+				x++;
+				if (je_veljavna_poteza(x, y)) nov_tip = polje[y][x];
+				else break;
+			}
+		
+		case "navpicno":
+			x = y;
+			y = pomozni;
+			while (nov_tip == tip && je_veljavna_poteza(x, y)) {
+				zmagovalna_poteza.add(new Koordinati(x, y));
+				y++;
+				if (je_veljavna_poteza(x, y)) nov_tip = polje[y][x];
+				else break;
+			}
+		
+		case "diagonalno":
+			while (nov_tip == tip && je_veljavna_poteza(x, y)) {
+				zmagovalna_poteza.add(new Koordinati(x, y));
+				x++;
+				y++;
+				if (je_veljavna_poteza(x, y)) nov_tip = polje[y][x];
+				else break;
+			}
+		
+		case "antidiagonalno":
+			x = (dimenzija_polja_x() - 1) - y;
+			y = pomozni;
+			
+			while (nov_tip == tip && je_veljavna_poteza(x, y)) {
+				zmagovalna_poteza.add(new Koordinati(x, y));
+				x--;
+				y++;
+				if (je_veljavna_poteza(x, y)) nov_tip = polje[y][x];
+				else break;
+			}
+		}
+	}
+
 	
 	public Stanje stanje() {
 		if (je_konec_igre()) {
@@ -447,6 +530,10 @@ public class Igra {
 	public HashSet<Koordinati> mnozica_izvedenih_potez() {
 		return mnozica_izvedenih_potez;
 	}
+	
+	public List<Koordinati> zmagovalna_poteza() {
+		return zmagovalna_poteza;
+	}
 
 }
 
@@ -455,8 +542,9 @@ public class Igra {
 // [[1, 2, 0], [0, 0, 0], [2, 1, 0]]
 		
 /*		
-|1|2|0|
-|0|0|0|
+|1|2|0| x = 3 - yr
+|0|0|0| y = xr
 |2|1|0|
-*/
+|5|7|2| (1, 2) -> (1, 1)
+*/ 
 
