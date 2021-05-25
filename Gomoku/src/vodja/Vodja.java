@@ -57,7 +57,7 @@ public class Vodja {
 	}
 
 	
-	public Minimax racunalnikovaInteligenca = new Minimax(1);
+	public Minimax racunalnikovaInteligenca = new Minimax(2);
 	
 	public void igrajRacunalnikovoPotezo() {
 		
