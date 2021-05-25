@@ -15,6 +15,46 @@ import splosno.Koordinati;
 public class OceniPozicijo {
 	
 	final int RADIJ = 4;
+	 
+	final static int vse_prazno = 1;
+	final static int eden_poln_4 = 2;
+	final static int eden_poln_3 = 8;
+	final static int eden_poln_2 = 32;
+	final static int eden_poln_1 = 2048;
+	final static int dva_polna_3_4 = 26;
+	final static int dva_polna_2_4 = 1024;
+	final static int dva_polna_1_4 = 1024;
+	final static int dva_polna_2_3 = 1024;
+	final static int dva_polna_1_3 = 1024;
+	final static int dva_polna_1_2 = 16384;
+	final static int trije_polni_2_3_4 = 100000;
+	final static int trije_polni_1_3_4 = 100000;
+	final static int trije_polni_1_2_4 = 100000;
+	final static int trije_polni_1_2_3 = 1000000;
+	final static int vsi_polni = -1;
+	
+	
+	/*
+	final static int vse_prazno = 1;
+	final static int eden_poln_4 = 2;
+	final static int eden_poln_3 = 3;
+	final static int eden_poln_2 = 5;
+	final static int eden_poln_1 = 11;
+	final static int dva_polna_3_4 = 4;
+	final static int dva_polna_2_4 = 10;
+	final static int dva_polna_1_4 = 10;
+	final static int dva_polna_2_3 = 10;
+	final static int dva_polna_1_3 = 10;
+	final static int dva_polna_1_2 = 14;
+	final static int trije_polni_2_3_4 = 16;
+	final static int trije_polni_1_3_4 = 16;
+	final static int trije_polni_1_2_4 = 16;
+	final static int trije_polni_1_2_3 = 20;
+	final static int vsi_polni = -1;
+	*/
+	
+	static boolean maksimalna_vrednost = false;
+	static boolean minimalna_vrednost = false;
 	
 	public enum Smer {
 		VRSTICA, STOLPEC, DIAGONALA, ANTIDIAGONALA
@@ -27,6 +67,11 @@ public class OceniPozicijo {
 		for (Koordinati k : mnozica_izvedenih_potez) {
 			ocena = ocena + oceni_okolico(k, igra, jaz, vrednost_polj);
 		}
+		if (maksimalna_vrednost) {
+			System.out.println("vse v redu");
+			return 2000000000;
+		}
+		if (minimalna_vrednost) return -2000000000;
 		return ocena;	
 	}
 	
@@ -103,51 +148,55 @@ public class OceniPozicijo {
 		int x = k.getX();
 		int y = k.getY();
 		Igralec igralec = polje[y][x].getIgralec();
+		int faktor_igralec = (igralec == jaz) ? 1 : -1;
 		int faktor_desni= 1;
-		int stevec = 0;
 		boolean desna = false;
 		for (int[] koordinati : enota) {
-			stevec++;
-			if (stevec == 5) {
+			Koordinati koord = new Koordinati(koordinati[0], koordinati[1]);
+			if (koord.equals(k)) {
 				desna = true;
 				break;
 			}
-			if (polje[koordinati[1]][koordinati[0]] != Polje.PRAZEN) {
-				Koordinati koord = new Koordinati(x, y);
+			Polje tip_igralca = polje[koordinati[1]][koordinati[0]];
+			if (tip_igralca != Polje.PRAZEN) {
+				if (tip_igralca.getIgralec() != igralec) continue;
 				if (!desna) {
 					switch (razdalja_polj(koord, k)) {
 					case 1: 
 						switch (faktor_desni) {
-						case 32: faktor_desni = 2000;
-						case 24: faktor_desni = 700;
-						case 12: faktor_desni = 300;
-						case 8: faktor_desni = 140;
-						case 6: faktor_desni = 64;
-						case 4: faktor_desni = 28;
-						case 2: faktor_desni = 20;
-						default: faktor_desni = 16;
+						case trije_polni_2_3_4:  faktor_desni = vsi_polni; break;
+						case dva_polna_2_3: faktor_desni = trije_polni_1_2_3; break;
+						//duplikat case dva_polna_2_4: faktor_desni = trije_polni_1_2_4;
+						case dva_polna_3_4: faktor_desni = trije_polni_1_3_4; break;
+						case eden_poln_2: if (faktor_desni == trije_polni_1_2_3) System.out.println("klee"); faktor_desni = dva_polna_1_2; break;
+						case eden_poln_3: faktor_desni = dva_polna_1_3; break;
+						case eden_poln_4: faktor_desni = dva_polna_1_4; break;
+						default: if (faktor_desni == trije_polni_1_2_3) System.out.println("kle1"); faktor_desni = eden_poln_1; break;
 					    }
 					break;
-					
-					case 2: 
+					case 2:
 						switch (faktor_desni) {
-						case 6: faktor_desni = 32; break;
-						case 4: faktor_desni = 24; break;
-						case 2: faktor_desni = 12;
-						default: faktor_desni = 8; break;
+						case dva_polna_3_4: faktor_desni = trije_polni_2_3_4; break; 
+						case eden_poln_3: faktor_desni = dva_polna_2_3; break;
+						case eden_poln_4: faktor_desni = dva_polna_2_4; break;
+						default: if (faktor_desni == trije_polni_1_2_3) System.out.println("kle2"); faktor_desni = eden_poln_2; break;
 						}
 				    break;
 					
-					case 3: if (faktor_desni == 2) faktor_desni = 6; else faktor_desni = 4; break;
-					case 4: faktor_desni = 2; break;
-					default: faktor_desni = 1;
+					case 3: if (faktor_desni == trije_polni_1_2_3) System.out.println("kle11"); if (faktor_desni == eden_poln_4) faktor_desni = dva_polna_3_4; else faktor_desni = eden_poln_3; break;
+					case 4: if (faktor_desni == trije_polni_1_2_3) System.out.println("kle10"); faktor_desni = eden_poln_4; break;
+					default: if (faktor_desni == trije_polni_1_2_3) System.out.println("kle3"); faktor_desni = vse_prazno; break;
 					}
 				}	
 			}
 		}
 		for (int[] koordinati : enota) {
+			Koordinati koord = new Koordinati(koordinati[0], koordinati[1]);
+			if (koord.equals(k)) {
+				desna = true;
+				break;
+			}
 			if (polje[koordinati[1]][koordinati[0]] == Polje.PRAZEN) {
-				Koordinati koord = new Koordinati(koordinati[0], koordinati[1]);
 				int nova_ocena;
 				switch (razdalja_polj(koord, k)) {
 				case 1: nova_ocena = 16; break;
@@ -156,7 +205,10 @@ public class OceniPozicijo {
 				case 4: nova_ocena = 2; break;
 				default: nova_ocena = 0;
 				}
-				int ocena = vrednost_polj.getOrDefault(koord, 0) + nova_ocena * faktor_desni;
+				int ocena = (vrednost_polj.getOrDefault(koord, 0) + nova_ocena * faktor_desni) * faktor_igralec;
+				if (faktor_desni == -1) {
+					if (igralec == jaz) maksimalna_vrednost = true; else minimalna_vrednost = true; 
+				}
 				vrednost_polj.put(koord, ocena);
 			}
 		}

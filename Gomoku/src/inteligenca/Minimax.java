@@ -35,7 +35,10 @@ public class Minimax extends Inteligenca {
 		HashSet<Koordinati> moznePoteze = igra.mnozica_potez();
 		for (Koordinati p: moznePoteze) {
 			Igra kopijaIgre = new Igra(igra);
-			kopijaIgre.odigraj(p);
+			if (p.equals(new Koordinati(3, 3))) {
+				kopijaIgre.odigraj(p);
+			}
+			else {kopijaIgre.odigraj(p);}
 			int ocena;
 			switch (kopijaIgre.stanje()) {
 			case ZMAGA_O: ocena = (jaz == Igralec.O ? ZMAGA : ZGUBA); break;

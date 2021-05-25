@@ -274,15 +274,13 @@ public class Igra {
 	}
 	
 	public void zamenjaj_igralca() {
-		if (igralec_na_potezi == igralec1) igralec_na_potezi = igralec2;
+		if (igralec_na_potezi.ime().equals(igralec1.ime())) {
+			igralec_na_potezi = igralec2;
+		}
 		else igralec_na_potezi = igralec1;
 	}
 	
 	public boolean je_konec_igre() {
-		if (je_konec_igre_vodoravno(polje, false) ||
-				je_konec_igre_navpicno() || 
-				je_konec_igre_diagonalno1(polje, false) ||
-				je_konec_igre_diagonalno2()) stanje_polja();
 		return (je_konec_igre_vodoravno(polje, false) ||
 			je_konec_igre_navpicno() || 
 			je_konec_igre_diagonalno1(polje, false) ||
@@ -488,7 +486,7 @@ public class Igra {
 	
 	public Stanje stanje() {
 		if (je_konec_igre()) {
-			return ((igralec_na_potezi == igralec1) ? Stanje.ZMAGA_O : Stanje.ZMAGA_X);
+			return ((igralec_na_potezi == igralec1) ? Stanje.ZMAGA_X : Stanje.ZMAGA_O);
 		}
 		if (mnozica_potez.size() == 0) return Stanje.NEODLOCENO;
 		return Stanje.V_TEKU;

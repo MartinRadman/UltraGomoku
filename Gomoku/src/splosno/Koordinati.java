@@ -35,4 +35,5 @@ public class Koordinati {
 		int x = this.x ; int y = this.y;
 		return (x + y) * (x + y + 1) / 2 + y;
 	}
+	
 }

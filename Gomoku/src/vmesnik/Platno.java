@@ -39,6 +39,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 	protected Color barva_ozadja = Color.GRAY;
 	protected Color barva_pisave = Color.YELLOW;
 	protected Color aktivna_barva = Color.RED;
+	protected Color zmagovalna_barva = new Color(255,215,0);
 	
 	public Igra igra;
 	protected HashMap<Integer, int[]> kvadratki;
@@ -217,7 +218,7 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 		
 		
 		if (igra.je_konec_igre()) {
-			g2.setColor(new Color(255,215,0));
+			g2.setColor(zmagovalna_barva);
 			g2.setStroke(new BasicStroke((int) (0.1 * stranica_kvadratka)));
 			List<Koordinati> zmagovalna_poteza = igra.zmagovalna_poteza();
 			
@@ -231,9 +232,6 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 			int[] sredisce2 = kvadratki.get(st_kvadratka2);
 			
 			g.drawLine(sredisce1[0], sredisce1[1], sredisce2[0], sredisce2[1]);
-			for(Koordinati poteza : zmagovalna_poteza) {
-			//	System.out.println(poteza);
-			}
 		}
 		
 	}
