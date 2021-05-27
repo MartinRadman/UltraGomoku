@@ -432,7 +432,6 @@ public class Igra {
 		int x = zacetna.getX();
 		int y = zacetna.getY();
 		int pomozni = x;
-		System.out.println(zacetna);
 		Polje tip = polje[y][x];
 		
 		if(smer.equals("navpicno") || smer.equals("antidiagonalno")) {
@@ -486,7 +485,10 @@ public class Igra {
 	
 	public Stanje stanje() {
 		if (je_konec_igre()) {
-			return ((igralec_na_potezi == igralec1) ? Stanje.ZMAGA_X : Stanje.ZMAGA_O);
+			Koordinati z = zmagovalna_poteza.get(0);
+			Polje zmaga = polje[z.getY()][z.getX()];
+			Stanje vrnjeno = (zmaga.getIgralec() == Igralec.O) ? Stanje.ZMAGA_O : Stanje.ZMAGA_X;
+			return vrnjeno;
 		}
 		if (mnozica_potez.size() == 0) return Stanje.NEODLOCENO;
 		return Stanje.V_TEKU;

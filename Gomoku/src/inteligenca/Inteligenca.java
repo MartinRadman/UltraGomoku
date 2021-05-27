@@ -21,14 +21,10 @@ public class Inteligenca extends splosno.KdoIgra {
 	public Koordinati monte_carlo(Igra igra) {
 		Drevo koren = new Drevo(igra);
 		MonteCarloTreeSearch iskalec = new MonteCarloTreeSearch(koren, igra.na_potezi(), igra);
-		iskalec.napolni_s_podlisti(koren);
+		iskalec.napolni_s_podlisti(koren, igra);
 		Drevo najboljsi = iskalec.monte_carlo_tree_search();
 		return najboljsi.k;
 		
 	}
-	
-	
-	
-
 }
 

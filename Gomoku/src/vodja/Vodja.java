@@ -59,13 +59,23 @@ public class Vodja {
 	public Inteligenca racunalnikovaInteligenca = new Inteligenca("Monte Carlo");
 	
 	public void igrajRacunalnikovoPotezo() {
+		/*
+		Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
+		
+		igra.odigraj(poteza);
+		okno.odigraj(poteza);
+		okno.osvezi_vmesnik();
+		igramo();
+		*/
+		
+		
 		
 		Igra zacetekIgra = igra;
 		SwingWorker<Koordinati, Void> worker = new SwingWorker<Koordinati, Void> () {
 			@Override
 			protected Koordinati doInBackground() {
 				Koordinati poteza = racunalnikovaInteligenca.izberiPotezo(igra);
-				try {TimeUnit.MICROSECONDS.sleep(1);} catch (Exception e) {};
+				try {TimeUnit.MICROSECONDS.sleep(10);} catch (Exception e) {};
 				return poteza;
 			}
 			@Override
@@ -81,6 +91,7 @@ public class Vodja {
 			}
 		};
 		worker.execute();
+		
 		
 		
 	

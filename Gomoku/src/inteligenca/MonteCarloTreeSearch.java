@@ -40,15 +40,17 @@ public class MonteCarloTreeSearch {
 	}
 	
 	public Drevo prehodi(Drevo list) {
-		Drevo nov_list = null;
-	    while (popolnoma_obiskani_podlisti(list)) {
+		Drevo nov_list = list;
+		if (nov_list.sez_listov.size() == 0) return nov_list;
+	    while (popolnoma_obiskani_podlisti(nov_list)) {
+	    	if (nov_list.sez_listov.size() == 0) return nov_list;
 	        nov_list = najboljsi_uct(nov_list);
-	    }
-	    if (nov_list != null) return nov_list; 
-	    return izberi_neobiskanega(list.sez_listov); // in case no children are present / node is terminal
+	        }
+	    return izberi_neobiskanega(nov_list.sez_listov); // in case no children are present / node is terminal
 	}
 	
 	public boolean popolnoma_obiskani_podlisti(Drevo list) {
+		if (list == null) return true;
 		for (Drevo podlist : list.sez_listov) {
 			if (podlist.je_obiskan == false) return false;
 		}
@@ -56,6 +58,7 @@ public class MonteCarloTreeSearch {
 	}
 	
 	public double izracunaj_uct(Drevo list) {
+		if (list == null) return -1000000;
 		double vrednost_lista = (double) list.v;
 		double obiskanost_lista = (double) list.n;
 		double obiskanost_korena = (double) koren.n;
@@ -71,6 +74,7 @@ public class MonteCarloTreeSearch {
 		Drevo najboljsi = null;
 		double uct_najboljsi = 0;
 		for (Drevo podlist : list.sez_listov) {
+			if (podlist == null) continue;
 			double uct_nov = izracunaj_uct(podlist);
 			if (najboljsi == null || uct_nov > uct_najboljsi) {
 				najboljsi = podlist;
@@ -85,6 +89,9 @@ public class MonteCarloTreeSearch {
 		for (Drevo list : sez_listov) {
 			if (!list.je_obiskan) neobiskani.add(list);
 		}
+		if (neobiskani.size() == 0) {
+			System.out.println("holler at me");
+		}
 		return izberi_nakljucno(neobiskani);
 	}
 	
@@ -95,25 +102,28 @@ public class MonteCarloTreeSearch {
 	    		
 	 	
 	public int odigraj_do_konca(Drevo list) {
-		napolni_s_podlisti(list);
+		napolni_s_podlisti(list, list.igra);
 	    while (je_nekoncen(list)) {
 	        list = pravilo_igranja(list);
-	        napolni_s_podlisti(list);
+	        napolni_s_podlisti(list, list.igra);
 	    }
 	    return rezultat(list);
 	}
 	
-	public void napolni_s_podlisti(Drevo list) {
+	public void napolni_s_podlisti(Drevo list, Igra kopija_igre) {
 		if (list.sez_listov.size() != 0) return;
-		HashSet<Koordinati> moznePoteze = igra.mnozica_potez();
-		List<Drevo> odigrane_poteze = new ArrayList<Drevo>();
-		for (Koordinati p: moznePoteze) {
-			Igra kopijaIgre = new Igra(igra);
-			kopijaIgre.odigraj(p);
-			Drevo poteza = new Drevo(igra, p, 0, 0, new ArrayList<Drevo>());
-			odigrane_poteze.add(poteza);
+		else {
+			HashSet<Koordinati> moznePoteze = kopija_igre.mnozica_potez();
+			List<Drevo> odigrane_poteze = new ArrayList<Drevo>();
+			for (Koordinati p: moznePoteze) {
+				Igra kopijaIgre = new Igra(kopija_igre);
+				kopijaIgre.odigraj(p);
+				Drevo poteza = new Drevo(kopijaIgre, p, 0, 0, new ArrayList<Drevo>());
+				poteza.s = list;
+				odigrane_poteze.add(poteza);
+			}
+			list.sez_listov = odigrane_poteze;
 		}
-		list.sez_listov = odigrane_poteze;
 		
 	}
 	
@@ -132,7 +142,7 @@ public class MonteCarloTreeSearch {
 		switch(stanje) {
 		case ZMAGA_O: rezultat = (jaz == Igralec.O) ? 1 : -1; break;
 		case ZMAGA_X: rezultat = (jaz == Igralec.X) ? 1 : -1; break;
-		case NEODLOCENO: rezultat = 0;
+		case NEODLOCENO: rezultat = 0; break;
 		case V_TEKU: new Error(); break;
 		default: new Error(); break;
 		}
@@ -142,8 +152,12 @@ public class MonteCarloTreeSearch {
 
 
     public void izpolni_za_nazaj(Drevo list, int rezultat) {
-    	if (list.je_koren()) return ;
+    	if (list.je_koren()) {
+    		list.n += 1;
+    		return ;
+    	}
     	list.v += rezultat;
+    	list.n += 1;
 	    izpolni_za_nazaj(list.s, rezultat);
     }
 
