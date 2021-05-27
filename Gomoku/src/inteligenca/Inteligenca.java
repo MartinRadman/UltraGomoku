@@ -90,6 +90,7 @@ public class Inteligenca extends splosno.KdoIgra {
 		if (razdalja < 2 && razdalja != 0) {
 			return true;
 		}
+		if (Math.abs(p.getX() - odigran.getX()) == 1 && Math.abs(p.getY() - odigran.getY()) == 1) return true;
 		return false;
 		
 	}

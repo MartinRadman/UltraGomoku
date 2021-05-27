@@ -31,6 +31,7 @@ public class OceniPozicijo {
 	final static int trije_polni_1_3_4 = 10000;
 	final static int trije_polni_1_2_4 = 10000;
 	final static int trije_polni_1_2_3 = 100000;
+	final static int open_stiri = 1000000;
 	final static int vsi_polni = -1;
 	
 	
@@ -152,6 +153,7 @@ public class OceniPozicijo {
 				desna = true;
 				break;
 			}
+			int mesto_od_k = enota.indexOf(k);
 			
 			Polje tip_igralca = polje[koordinati[1]][koordinati[0]];
 			if (tip_igralca != Polje.PRAZEN) {
@@ -161,7 +163,20 @@ public class OceniPozicijo {
 					case 1: 
 						switch (faktor_desni) {
 						case trije_polni_2_3_4:  faktor_desni = vsi_polni; break;
-						case dva_polna_2_3: faktor_desni = trije_polni_1_2_3; break;
+						case dva_polna_2_3: 
+							
+							if (enota.size() > mesto_od_k + 1) {
+								int x_kandidata = enota.get(mesto_od_k + 1)[0];
+								int y_kandidata = enota.get(mesto_od_k + 1)[1];
+								faktor_desni = (polje[y_kandidata][x_kandidata] == Polje.PRAZEN) ? open_stiri : trije_polni_1_2_3;
+							}
+							else {
+								faktor_desni = trije_polni_1_2_3;
+							}
+
+							break;
+							
+							
 						case dva_polna_2_4: faktor_desni = trije_polni_1_2_4; break;
 						case dva_polna_3_4: faktor_desni = trije_polni_1_3_4; break;
 						case eden_poln_2: if (faktor_desni == trije_polni_1_2_3) System.out.println("klee"); faktor_desni = dva_polna_1_2; break;
@@ -233,6 +248,68 @@ public class OceniPozicijo {
 			vsota += x;
 		}
 		return vsota;
+	}
+	
+	public static int[] najdi_petega(List<int[]> enota, Igra igra) {
+		String vrsta = najdi_vrsto_enote(enota);
+		int[] cetrti = enota.get(0);
+		int cetrtix = cetrti[0];
+		int cetrtiy = cetrti[1];
+		switch (vrsta) {
+		case "navzgor": cetrtiy += 1; break;
+		case "navzdol": cetrtiy -= 1; break;
+		case "levo": cetrtix += 1; break;
+		case "desno": cetrtix -= 1; break;
+		case "navzdol_desno": cetrtiy -= 1; cetrtix -= 1; break;
+		case "navzdol_levo":cetrtiy -= 1; cetrtix += 1; break;
+		case "navzgor_desno": cetrtiy += 1; cetrtix -= 1; break;
+		case "navzgor_levo": cetrtiy += 1; cetrtix += 1; break;
+		}
+		
+		int petix = cetrtix;
+		int petiy = cetrtiy;
+		if (igra.je_veljavna_poteza(petix, petiy)) {
+			int[] peti = new int[2];
+			peti[0] = petix;
+			peti[1] = petiy;
+			return peti;
+		}
+		else {
+			int[] peti = new int[2];
+			peti[0] = -1;
+			peti[1] = -1;
+			return peti;
+		}
+	}
+	
+	public static String najdi_vrsto_enote(List<int[]> enota) {
+		int[] e1 = enota.get(0);
+		int[] e2 = enota.get(1);
+		
+		int e1x = e1[0];
+		int e1y = e1[1];
+		int e2x = e2[0];
+		int e2y = e2[1];
+		
+		if (e1x - e2x == 0) {
+			if(e1y > e2y) return "navzgor";
+			else return "navzdol";
+		}
+		
+		if (e1y - e2y == 0) {
+			if(e1x > e2x) return "levo";
+			else return "desno";
+		}
+		
+		if (e2x > e1x) {
+			if (e2y > e1y) return "navzdol_desno";
+			else return "navzgor_desno";
+		}
+		
+		
+			if (e2y > e1y) return "navzdol_levo";
+			else return "navzgor_levo";
+		
 	}
 	
 

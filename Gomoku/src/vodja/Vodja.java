@@ -56,7 +56,7 @@ public class Vodja {
 	}
 
 	
-	public Inteligenca racunalnikovaInteligenca = new Inteligenca(4);
+	public Inteligenca racunalnikovaInteligenca = new Inteligenca(3);
 	
 	public void igrajRacunalnikovoPotezo() {
 		/*
