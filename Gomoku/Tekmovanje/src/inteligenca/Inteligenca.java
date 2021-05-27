@@ -18,9 +18,9 @@ public class Inteligenca extends splosno.KdoIgra {
 	
 	private int globina;
 	
-	public Inteligenca (int globina) {
+	public Inteligenca () {
 		super("Martin Radman in Gašper Petrovič");
-		this.globina = globina;
+		this.globina = 3;
 	}
 	
 	public Koordinati izberiPotezo (Igra igra) {
@@ -35,21 +35,11 @@ public class Inteligenca extends splosno.KdoIgra {
 		if (igra.na_potezi() == jaz) {ocena = ZGUBA;} else {ocena = ZMAGA;}
 		HashSet<Koordinati> mnozica_potez = igra.mnozica_potez();
 		List<Koordinati> moznePoteze = new ArrayList<Koordinati>();	
-		
-		
-		final int casovna_omejitev = 4800; // v milisekundah
-		long start = System.currentTimeMillis();
-		long konec = start + casovna_omejitev;
-		
-		
 		for (Koordinati poteza : mnozica_potez) {
 			moznePoteze.add(poteza);
 		}
 		Koordinati kandidat = moznePoteze.get(0); // Možno je, da se ne spremini vrednost kanditata. Zato ne more biti null.
 		for (Koordinati p: moznePoteze) {
-			if (System.currentTimeMillis() >= konec) {
-				return new OcenjenaPoteza (kandidat, ocena);
-			}
 			boolean preskoci = true;
 			for (Koordinati odigran : igra.mnozica_izvedenih_potez()) {
 				if (igra.mnozica_izvedenih_potez().size() < 4 && je_osamljen(odigran, igra)) continue;
