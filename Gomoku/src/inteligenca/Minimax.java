@@ -7,7 +7,7 @@ import logika.Igra.Igralec;
 import logika.Igra;
 import splosno.Koordinati;
 
-public class Minimax extends Inteligenca {
+public class Minimax extends splosno.KdoIgra {
 	
 	private static final int ZMAGA = Integer.MAX_VALUE;
 	private static final int ZGUBA = -ZMAGA;
@@ -17,7 +17,7 @@ public class Minimax extends Inteligenca {
 	
 	public HashMap<Koordinati, Integer> ocene = new HashMap<Koordinati, Integer>();
 	
-	public Minimax (int globina) {
+	public Minimax(int globina) {
 		super("minimax globina " + globina);
 		this.globina = globina;
 	}
@@ -55,7 +55,6 @@ public class Minimax extends Inteligenca {
 					|| jaz != igra.na_potezi() && ocena < najboljsaPoteza.ocena)
 				najboljsaPoteza = new OcenjenaPoteza(p, ocena);		
 		}
-		System.out.println(najboljsaPoteza.ocena);
 		return najboljsaPoteza;
 	}
 	

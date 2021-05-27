@@ -242,7 +242,6 @@ public class Okno extends JFrame implements ActionListener {
 		int[] kvadratek = new int[2];
 		kvadratek[0] = poteza.getX();
 		kvadratek[1] = poteza.getY();
-		System.out.println("" + kvadratek[0] + " " + kvadratek[1]);
 		int st_kvadratka = (kvadratek[1] + 1) * (igra.dimenzija_polja_x() + 1) + kvadratek[0] + 1;
  		if (platno.prvi) platno.izbrana_polja.get("1").add(st_kvadratka);
 		else platno.izbrana_polja.get("2").add(st_kvadratka);

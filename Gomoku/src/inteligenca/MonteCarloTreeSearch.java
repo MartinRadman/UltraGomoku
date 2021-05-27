@@ -18,6 +18,7 @@ public class MonteCarloTreeSearch {
 	protected long konec = start + casovna_omejitev;
 	
 	
+	
 	protected Drevo koren;
 	protected Igralec jaz;
 	protected Igra igra;
@@ -89,10 +90,18 @@ public class MonteCarloTreeSearch {
 		for (Drevo list : sez_listov) {
 			if (!list.je_obiskan) neobiskani.add(list);
 		}
-		if (neobiskani.size() == 0) {
-			System.out.println("holler at me");
-		}
 		return izberi_nakljucno(neobiskani);
+	}
+	
+	
+	public int razdalja_polj(Koordinati a, Koordinati b) {
+		int a0 = a.getX();
+		int a1 = a.getY();
+		int b0 = b.getX();
+		int b1 = b.getY();
+		int x_razdalja = Math.abs(a0 - b0);
+		if (x_razdalja == 0) return Math.abs(a1 - b1);
+		return x_razdalja;
 	}
 	
 	public Drevo izberi_nakljucno(List<Drevo> sez_listov) {
@@ -110,12 +119,23 @@ public class MonteCarloTreeSearch {
 	    return rezultat(list);
 	}
 	
+	
+	
 	public void napolni_s_podlisti(Drevo list, Igra kopija_igre) {
 		if (list.sez_listov.size() != 0) return;
 		else {
 			HashSet<Koordinati> moznePoteze = kopija_igre.mnozica_potez();
 			List<Drevo> odigrane_poteze = new ArrayList<Drevo>();
 			for (Koordinati p: moznePoteze) {
+				
+				if (list.je_koren()) {
+					boolean nadaljuj = true;
+					for(Koordinati kamencek : kopija_igre.mnozica_izvedenih_potez()) {
+						if (halal(kamencek, p)) nadaljuj = false;;					
+					}
+					if (nadaljuj) continue;
+				}
+				
 				Igra kopijaIgre = new Igra(kopija_igre);
 				kopijaIgre.odigraj(p);
 				Drevo poteza = new Drevo(kopijaIgre, p, 0, 0, new ArrayList<Drevo>());
@@ -125,6 +145,12 @@ public class MonteCarloTreeSearch {
 			list.sez_listov = odigrane_poteze;
 		}
 		
+	}
+	
+	public boolean halal(Koordinati kamencek, Koordinati p) {
+		if (Math.abs(kamencek.getX() - p.getX()) != Math.abs(kamencek.getY() - p.getY())) return false;
+		if (razdalja_polj(kamencek, p) <= 2) return true;
+		return false;
 	}
 	
 	public boolean je_nekoncen(Drevo list) {

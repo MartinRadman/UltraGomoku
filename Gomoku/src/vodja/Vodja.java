@@ -56,7 +56,7 @@ public class Vodja {
 	}
 
 	
-	public Inteligenca racunalnikovaInteligenca = new Inteligenca("Monte Carlo");
+	public Inteligenca racunalnikovaInteligenca = new Inteligenca(4);
 	
 	public void igrajRacunalnikovoPotezo() {
 		/*
@@ -67,7 +67,6 @@ public class Vodja {
 		okno.osvezi_vmesnik();
 		igramo();
 		*/
-		
 		
 		
 		Igra zacetekIgra = igra;

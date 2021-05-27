@@ -352,7 +352,6 @@ public class Platno extends JPanel implements MouseListener, MouseMotionListener
 			for (Map.Entry<Integer, int[]> kvadratek : kvadratki.entrySet()) {
 				int kljuc = kvadratek.getKey();
 				if (kljuc <= dim_x || (kljuc % (dim_x + 1) == 0)) {
-					System.out.println("" + kljuc);
 					continue;
 				}
 				if (this.izbrana_polja.get("1").contains(kljuc) || this.izbrana_polja.get("2").contains(kljuc)) continue;
