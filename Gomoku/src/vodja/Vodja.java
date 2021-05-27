@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingWorker;
 
 import inteligenca.Inteligenca;
-import inteligenca.Minimax;
 import logika.Igra;
 import logika.Igra.Igralec;
 import splosno.KdoIgra;
@@ -57,7 +56,7 @@ public class Vodja {
 	}
 
 	
-	public Minimax racunalnikovaInteligenca = new Minimax(2);
+	public Inteligenca racunalnikovaInteligenca = new Inteligenca("Monte Carlo");
 	
 	public void igrajRacunalnikovoPotezo() {
 		
